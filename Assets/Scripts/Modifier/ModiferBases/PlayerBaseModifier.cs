@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerBaseModifier : BaseModifer
+public abstract class PlayerBaseModifier : BaseModifier
 {
     protected Player player;
 
