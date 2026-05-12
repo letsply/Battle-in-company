@@ -1,16 +1,11 @@
 using UnityEngine;
 
-public class ItemBaseModifier : MonoBehaviour
+public class ItemBaseModifier : BaseModifier
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    protected Item item;
 
-    // Update is called once per frame
-    void Update()
+    public virtual void FindPlayer(Item itemToMod)
     {
-        
+        item = itemToMod;
     }
 }
