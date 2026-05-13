@@ -152,7 +152,8 @@ namespace CustomInspector.Editor
 
                 default:
                     return DrawProperties.GetPropertyWithMessageHeight(label, property);
-            };
+            }
+            ;
         }
     }
 }

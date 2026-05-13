@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 
 namespace CustomInspector.Extensions
-{    
+{
     public static class Conversions
     {
         public static Quaternion ToQuaternion(this Vector4 v4)
@@ -42,7 +42,7 @@ namespace CustomInspector.Extensions
                 parsedColor = ParseColor(s);
                 return true;
             }
-            catch(Exception)
+            catch (Exception)
             {
                 parsedColor = Color.red;
                 return false;
@@ -128,10 +128,10 @@ namespace CustomInspector.Extensions
         {
             for (int i = 0; i < floatStr.Length; i++)
             {
-                if(!char.IsNumber(floatStr[i]))
+                if (!char.IsNumber(floatStr[i]))
                 {
                     int @int = int.Parse(floatStr[..i]);
-                    if(i + 1 < floatStr.Length && floatStr[i] == '.')
+                    if (i + 1 < floatStr.Length && floatStr[i] == '.')
                     {
                         return (floatStr[i + 1] >= '5') ? @int + 1 : @int;
                     }

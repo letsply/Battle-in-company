@@ -210,7 +210,7 @@ namespace CustomInspector.Extensions
         {
             DirtyValue res = new(nested, fieldOwner, fieldInfo, Type);
             res.FollowPath(propertyPath, bindingAttr, forceFind);
-            
+
             return res;
         }
 
@@ -264,7 +264,7 @@ namespace CustomInspector.Extensions
 
                                 Type = PropertyConversions.GetIListElementType(Type);
 
-                                if(forceFind)
+                                if (forceFind)
                                     targetObject = (targetObject as IList)[dataIndex];
                                 else if (targetObject != null)
                                 {

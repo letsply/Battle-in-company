@@ -128,7 +128,7 @@ namespace CustomInspector
             var paths = AssetDatabase.FindAssets("", new string[] { GetPath() })
                             .Select(_ => new FilePath(AssetDatabase.GUIDToAssetPath(_)))
                             .Where(_ => _.HasPath());
-            if(fileEnding == "*")
+            if (fileEnding == "*")
                 return paths.ToList();
             else
                 return paths.Where(_ => _.HasEnding(fileEnding)).ToList();

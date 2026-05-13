@@ -1,17 +1,23 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using System.Collections.Generic;
-
 
 public class Player : MonoBehaviour, IModifieable
 {
+    #region Values
     [SerializeField] private float strenght;
     [SerializeField] private float health;
     [SerializeField] private float speed;
 
-    public float Strenght(float newStrenght) => strenght = newStrenght;
-    public float Health(float newHealth) => health = newHealth;
-    public float Speed(float newSpeed) => speed = newSpeed;
+    public float GetStrenght() => strenght;
+    public float GetHealth() => health;
+    public float GetSpeed() => speed;
+
+    public float SetStrenght(float newStrenght) => strenght = newStrenght;
+    public float SetHealth(float newHealth) => health = newHealth;
+    public float SetSpeed(float newSpeed) => speed = newSpeed;
+
+    #endregion
 
     private List<float> ExtraModifierValues = new List<float>();
     private List<string> ExtraModifierDestinations = new List<string>();
@@ -33,7 +39,7 @@ public class Player : MonoBehaviour, IModifieable
 
     public void TakeDmg(float dmg)
     {
-        health -= dmg;
+         health -= dmg;
     }
 
     #region Actions
@@ -49,6 +55,11 @@ public class Player : MonoBehaviour, IModifieable
     #endregion
 
     #region Input
+    public void TakeItem(InputAction.CallbackContext context)
+    {
+
+    }
+
     public void HitInput(InputAction.CallbackContext context)
     {
 
@@ -59,6 +70,6 @@ public class Player : MonoBehaviour, IModifieable
 
     }
     #endregion
-   
+
 }
 

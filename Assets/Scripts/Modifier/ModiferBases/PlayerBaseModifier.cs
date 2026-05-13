@@ -1,5 +1,3 @@
-using UnityEngine;
-
 public abstract class PlayerBaseModifier : BaseModifier
 {
     protected Player player;
@@ -7,5 +5,5 @@ public abstract class PlayerBaseModifier : BaseModifier
     public virtual void FindPlayer(Player playerToMod)
     {
         player = playerToMod;
-    } 
+    }
 }

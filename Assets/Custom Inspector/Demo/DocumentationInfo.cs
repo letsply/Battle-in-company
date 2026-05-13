@@ -6,12 +6,12 @@ namespace CustomInspector.Demo
     public class DocumentationInfo : MonoBehaviour
     {
         [MessageBox("Open the CustomInspector-EditorWindow!", MessageBoxType.Info)]
-        
-        [ReadOnly(DisableStyle.OnlyText, LabelStyle.NoLabel)]
-            public string info1 = "See Documentation at:";
 
         [ReadOnly(DisableStyle.OnlyText, LabelStyle.NoLabel)]
-            public string info2 = "'Window' -> CustomInspector Documentation";
+        public string info1 = "See Documentation at:";
+
+        [ReadOnly(DisableStyle.OnlyText, LabelStyle.NoLabel)]
+        public string info2 = "'Window' -> CustomInspector Documentation";
 
 
         [Button(nameof(GetMoreInformation)), Tooltip("This logs an information in the console")]

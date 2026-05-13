@@ -1,9 +1,7 @@
 using CustomInspector;
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using TMPro;
-using System;
-using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine.UI;
 
 public class MovementV2 : MonoBehaviour
@@ -54,7 +52,7 @@ public class MovementV2 : MonoBehaviour
     [Header("WallStuff")]
     public bool ShowWallVars = true;
 
-    [ShowIf(nameof(ShowWallVars))][SerializeField][Range(0,1)] private float m_wallRunningSack;
+    [ShowIf(nameof(ShowWallVars))][SerializeField][Range(0, 1)] private float m_wallRunningSack;
     [ShowIf(nameof(ShowWallVars))][SerializeField] private float m_wallJumpForce;
     [ShowIf(nameof(ShowWallVars))][SerializeField] private float m_wallRunningSpeed;
     [ShowIf(nameof(ShowWallVars))][SerializeField] private bool m_enableWallRunning;
@@ -70,7 +68,7 @@ public class MovementV2 : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        StaminaContainer.SetActive(false); 
+        StaminaContainer.SetActive(false);
         _maxJumps = m_jumps;
         _maxStamina = m_stamina;
     }
@@ -81,11 +79,11 @@ public class MovementV2 : MonoBehaviour
         //float speed = Mathf.Abs(_rb.linearVelocity.x) + Mathf.Abs(_rb.linearVelocity.z);
         //SpeedText.text = Math.Round(speed,3).ToString();
         // StaminaBar
-        StaminaBar.fillAmount =  m_stamina / _maxStamina;
+        StaminaBar.fillAmount = m_stamina / _maxStamina;
 
         Move();
 
-        if(m_enableWallRunning == true)
+        if (m_enableWallRunning == true)
         { WallRunn(); }
 
     }
@@ -101,11 +99,12 @@ public class MovementV2 : MonoBehaviour
         float _targetSpeed = (_sprinting && m_stamina > 0 && _OnFloor || _sprinting && m_infinitStamina && _OnFloor) ? m_sprint : m_speed;
 
         // if sprint show stamina bar and remove stamina if not then fill up and dont show it when its full
-        if (_sprinting && m_stamina > 0 && m_infinitStamina == false && _OnFloor) {
+        if (_sprinting && m_stamina > 0 && m_infinitStamina == false && _OnFloor)
+        {
             m_stamina -= 1 * Time.deltaTime;
             StaminaContainer.SetActive(true);
         }
-        else if(m_stamina <= _maxStamina && _sprinting == false && m_infinitStamina == false && _OnFloor)
+        else if (m_stamina <= _maxStamina && _sprinting == false && m_infinitStamina == false && _OnFloor)
         {
             m_stamina += m_staminaRegain * Time.deltaTime;
             if (m_stamina >= _maxStamina)
@@ -188,11 +187,13 @@ public class MovementV2 : MonoBehaviour
 
         #endregion
 
-        if (_OnFloor) {
+        if (_OnFloor)
+        {
             _rb.AddForce(_moveDirection * _targetSpeed, ForceMode.Force);
             Debug.DrawRay(Bottom.transform.position, _moveDirection, Color.blue);
         }
-        else { 
+        else
+        {
             _rb.AddForce(_moveDirection * _targetSpeed * m_airFriction, ForceMode.Force);
         }
 
@@ -232,10 +233,12 @@ public class MovementV2 : MonoBehaviour
             {
                 _rb.AddForce(Vector3.up * m_wallJumpForce * 2, ForceMode.VelocityChange);
 
-                if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out leftSideRaycast, _wallRunningRange, WallMask)){
+                if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.right), out leftSideRaycast, _wallRunningRange, WallMask))
+                {
                     _rb.AddForce(transform.right * -1 * m_wallJumpForce, ForceMode.VelocityChange);
                 }
-                else {
+                else
+                {
                     _rb.AddForce(transform.right * m_wallJumpForce, ForceMode.VelocityChange);
                 }
 
@@ -246,14 +249,14 @@ public class MovementV2 : MonoBehaviour
 
         #region WallJumping
 
-        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out FrontSideRaycast, _wallRunningRange, WallMask) && _OnFloor == false && _jump )
+        if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.forward), out FrontSideRaycast, _wallRunningRange, WallMask) && _OnFloor == false && _jump)
         {
             m_jumps = _maxJumps;
             _rb.AddForce(Vector3.up * m_wallJumpForce * 2, ForceMode.VelocityChange);
             _rb.AddForce(transform.forward * -1 * m_wallJumpForce, ForceMode.VelocityChange);
             m_jumps--;
         }
-        else if(Physics.Raycast(transform.position, transform.TransformDirection(Vector3.back), out BackSideRaycast, _wallRunningRange, WallMask) && _OnFloor == false && _jump)
+        else if (Physics.Raycast(transform.position, transform.TransformDirection(Vector3.back), out BackSideRaycast, _wallRunningRange, WallMask) && _OnFloor == false && _jump)
         {
             m_jumps = _maxJumps;
             _rb.AddForce(Vector3.up * m_wallJumpForce * 2, ForceMode.VelocityChange);

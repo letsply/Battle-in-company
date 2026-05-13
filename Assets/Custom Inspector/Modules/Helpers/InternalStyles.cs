@@ -19,5 +19,5 @@ namespace CustomInspector.Extensions
         /// The common: label has default labelwith and value field starts in next column
         /// </summary>
         FullSpacing,
-    }  
+    }
 }
