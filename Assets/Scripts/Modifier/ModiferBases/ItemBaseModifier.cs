@@ -1,10 +1,44 @@
 
+using System;
+using System.Collections.Generic;
+
 public class ItemBaseModifier : BaseModifier
 {
     protected Item item;
+    protected List<BaseEffect> effects = new List<BaseEffect>();
 
-    public virtual void FindPlayer(Item itemToMod)
+    public void FindItem(Item itemToMod)
     {
         item = itemToMod;
+    }
+
+    public virtual void OnItemPunchHit(ref float damageMod,ref float critMod)
+    {
+
+    }
+    public virtual void OnItemHit(ref float damageMod)
+    {
+
+    }
+    public virtual void OnItemUse()
+    {
+
+    }
+    public void GiveEffect(Player player, EnemyBase enemy)
+    {
+        if (effects != null && enemy == null)
+        {
+            foreach (BaseEffect effect in effects)
+            {
+                player.AddEffect(effect);
+            }
+        }
+        else if(effects != null && player == null)
+        {
+            foreach (BaseEffect effect in effects)
+            {
+                enemy.AddEffect(effect);
+            }
+        }
     }
 }

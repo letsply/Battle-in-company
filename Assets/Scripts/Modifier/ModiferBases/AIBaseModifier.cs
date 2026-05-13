@@ -1,16 +1,11 @@
 using UnityEngine;
+using static UnityEditor.Progress;
 
-public class AIBaseModifier : MonoBehaviour
+public class AIBaseModifier : BaseModifier
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    protected EnemyBase enemy;
+    public void FindEnemy(EnemyBase enemyToMod)
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
+        enemy = enemyToMod;
     }
 }

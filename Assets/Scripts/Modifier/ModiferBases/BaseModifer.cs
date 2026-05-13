@@ -4,6 +4,6 @@ public abstract class BaseModifier
 {
     public virtual void Modify()
     {
-        Debug.Log("test");
+
     }
 }

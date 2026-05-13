@@ -8,33 +8,53 @@ public class Player : MonoBehaviour, IModifieable
     [SerializeField] private float strenght;
     [SerializeField] private float health;
     [SerializeField] private float speed;
+    [SerializeField] private float criticalDamageMultiplier;
 
     public float GetStrenght() => strenght;
     public float GetHealth() => health;
     public float GetSpeed() => speed;
+    public float GetCriticalDamageMultiplier() => criticalDamageMultiplier;
 
-    public float SetStrenght(float newStrenght) => strenght = newStrenght;
-    public float SetHealth(float newHealth) => health = newHealth;
-    public float SetSpeed(float newSpeed) => speed = newSpeed;
+    public float SetValue(ref float oldValue,float newValue) => oldValue = newValue;
 
     #endregion
 
-    private List<float> ExtraModifierValues = new List<float>();
-    private List<string> ExtraModifierDestinations = new List<string>();
-
+    #region ModifierStuff
     private List<PlayerBaseModifier> playerModifiers = new List<PlayerBaseModifier>();
+    public void ApplyModifiers()
+    {
+        if (playerModifiers.Count > 0)
+        {
+            foreach (var mod in playerModifiers) {
+                mod.Modify();
+                mod.FindPlayer(this);
+            }
+        }
+    }
+
+    #endregion
+
+    private List<BaseEffect> playerEffects = new List<BaseEffect>();
+    public void AddEffect(BaseEffect effect)
+    {
+        playerEffects.Add(effect);
+    }
 
     public void Start()
     {
         ApplyModifiers();
     }
 
-    public void ApplyModifiers()
+    public void FixedUpdate()
     {
-        if (playerModifiers.Count > 0)
-        {
-            foreach (var mod in playerModifiers) { mod.Modify(); }
-        }
+       for (int i = 0; i < playerEffects.Count; i++)
+       {
+            playerEffects[i].Update();
+            if (playerEffects[i].GetDuration() <= 0)
+            {
+                playerEffects.RemoveAt(i);
+            }
+       }
     }
 
     public void TakeDmg(float dmg)
@@ -49,6 +69,11 @@ public class Player : MonoBehaviour, IModifieable
     }
 
     private void Throw()
+    {
+
+    }
+
+    private void Use()
     {
 
     }
