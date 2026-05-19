@@ -38,6 +38,8 @@ public class Item : MonoBehaviour, IModifieable
         hardness = itemData.Hardness();
         weight = itemData.Weight();
         handiness = itemData.Handiness();
+
+        rb.mass = weight;
     }
 
     public void ApplyModifiers()
@@ -49,6 +51,18 @@ public class Item : MonoBehaviour, IModifieable
                 mod.Modify();
             }
         }
+    }
+
+    public void UseItem()
+    {
+        if (itemModifiers.Count > 0)
+        {
+            foreach (var mod in itemModifiers)
+            {
+                mod.OnItemUse();
+            }
+        }
+        Debug.Log("jlewb");
     }
 
     void FixedUpdate()
@@ -71,9 +85,9 @@ public class Item : MonoBehaviour, IModifieable
                 float damage = 0;
                 // calc damage and the crit chance
                 if (enemyHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetStrenght(), 2) * hardness; }
+                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetValue<float>(Player.Values.strength), 2) * hardness; }
                 else if ( playerHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetStrenght(), 2) * hardness; }
+                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetValue<float>(EnemyBase.Values.strength), 2) * hardness; }
 
                 float critchance = handiness;
                 // modify damage and critchance
@@ -86,9 +100,9 @@ public class Item : MonoBehaviour, IModifieable
                 if (crit <= critchance)
                 {
                     if (enemyHolding == null)
-                    { damage *= playerHolding.GetCriticalDamageMultiplier(); }
+                    { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetCriticalDamageMultiplier(); }
+                    { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
                 }
                 // let the player take dmg
                 collision.transform.GetComponent<Player>().TakeDmg(damage);
@@ -120,9 +134,9 @@ public class Item : MonoBehaviour, IModifieable
                 // calc damage and the crit chance
                 float damage = 0;
                 if (enemyHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetStrenght(), 2) * hardness; }
+                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetValue<float>(Player.Values.strength), 2) * hardness; }
                 else if (playerHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetStrenght(), 2) * hardness; }
+                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetValue<float>(EnemyBase.Values.strength), 2) * hardness; }
 
                 float critchance = handiness;
 
@@ -137,9 +151,9 @@ public class Item : MonoBehaviour, IModifieable
                 if (crit <= critchance)
                 {
                     if (enemyHolding == null)
-                    { damage *= playerHolding.GetCriticalDamageMultiplier(); }
+                    { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetCriticalDamageMultiplier(); }
+                    { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
                 }
 
                 // let the Enemy take dmg

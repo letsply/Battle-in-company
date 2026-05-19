@@ -1,21 +1,79 @@
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class EnemyBase : MonoBehaviour, IModifieable
+public abstract class EnemyBase : MonoBehaviour, IModifieable
 {
     #region Values
     [SerializeField] private float strenght;
     [SerializeField] private float health;
-    [SerializeField] private float speed;
     [SerializeField] private float criticalDamageMultiplier;
 
-    public float GetStrenght() => strenght;
-    public float GetHealth() => health;
-    public float GetSpeed() => speed;
-    public float GetCriticalDamageMultiplier() => criticalDamageMultiplier;
+    #region Movement(Walking)
 
-    public float SetValue(ref float oldValue, float newValue) => oldValue = newValue;
+    [Header("MovementWalkValues")]
+    [SerializeField] private float speed;
+    [SerializeField] private float sprintingSpeed;
+    [SerializeField] private float maxStamina;
+    [SerializeField] private float staminaRegain;
+    [SerializeField] private bool infinitStamina;
+    private float stamina;
+
+    #endregion
+
+    #region Movement(Jump)
+
+    [Header("MovementWalkValues")]
+    [SerializeField] private float jumpForce;
+    [SerializeField] private int jumps; // The amount off Jumps the player has
+    [SerializeField] private float airResistance;
+
+    private int maxJumps;
+    #endregion
+
+    public enum Values
+    {
+        strength,
+        health,
+        criticalDamageMultiplier,
+        speed,
+        sprintingSpeed,
+        stamina,
+        staminaRegain,
+        infinitStamina,
+        jumpForce,
+        jumps,
+        airResistance,
+    }
+    private string[] valueNames = new string[]
+    {
+        "strength",
+        "health",
+        "criticalDamageMultiplier",
+        "speed",
+        "sprintingSpeed",
+        "stamina",
+        "staminaRegain",
+        "infinitStamina",
+        "jumpForce",
+        "jumps",
+        "airResistance",
+    };
+
+    public T GetValue<T>(Values valueName)
+    {
+        string name = valueNames[(int)valueName];
+        var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+        return (T)field.GetValue(this);
+    }
+
+    public void SetValue<T>(Values valueName, T value)
+    {
+        var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
+        field.SetValue(this, value);
+    }
+
 
     #endregion
 

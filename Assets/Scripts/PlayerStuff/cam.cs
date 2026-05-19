@@ -8,7 +8,12 @@ public class cam : MonoBehaviour
     private float _rotationY;
     private float _rotationX;
 
-    public void Update()
+    public void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+    public void LateUpdate()
     {
         Look();
     }
