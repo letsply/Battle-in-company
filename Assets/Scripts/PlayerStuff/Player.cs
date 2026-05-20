@@ -1,8 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.LowLevelPhysics2D;
+using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class Player : MonoBehaviour, IModifieable
 {
@@ -10,6 +13,7 @@ public class Player : MonoBehaviour, IModifieable
     private Rigidbody rb { get => gameObject.GetComponent<Rigidbody>(); }
     [SerializeField] private GameObject Bottom;
     [SerializeField] private GameObject itemHolder;
+    [SerializeField] private Animator itemHolderAnim;
     [SerializeField] private GameObject Cam;
     private GameObject itemHolding;
 
@@ -44,6 +48,7 @@ public class Player : MonoBehaviour, IModifieable
     private int maxJumps;
     #endregion
 
+    #region Set & Get Values
     public enum Values
     {
         strength,
@@ -88,6 +93,14 @@ public class Player : MonoBehaviour, IModifieable
 
     #endregion
 
+    // Charging Atack stuff
+    float chargeTime = 0;
+    bool startCounting = false;
+
+    bool hitting = false;
+
+    #endregion
+
     #region ModifierStuff
     private List<BaseEffect> playerEffects = new List<BaseEffect>();
     private List<PlayerBaseModifier> playerModifiers = new List<PlayerBaseModifier>();
@@ -127,6 +140,9 @@ public class Player : MonoBehaviour, IModifieable
     public GameObject StaminaContainer;
     public Image StaminaBar;
 
+    public GameObject ChargeContainer;
+    public Image ChargeBar;
+
     public void Start()
     {
         stamina = maxStamina;
@@ -139,6 +155,37 @@ public class Player : MonoBehaviour, IModifieable
         // Update HeldItemPos
         if (itemHolding != null)
         { itemHolding.transform.position = itemHolder.transform.position; }
+
+        #region Charge
+        if (startCounting && itemHolding != null)
+        {
+            ChargeBar.fillAmount = chargeTime;
+            chargeTime += Time.deltaTime;
+        }
+        else
+        {
+            chargeTime = 0;
+        }
+
+        // if OverCharged
+        if (itemHolding != null && chargeTime >= 1)
+        {
+            // droping item if held to long
+            if (itemHolding != null)
+            {
+                itemHolding.GetComponent<Rigidbody>().useGravity = true;
+                itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
+                itemHolding.GetComponent<Collider>().enabled = true;
+                itemHolding.GetComponent<Rigidbody>().AddForce(moveDirection * (rb.linearVelocity.x + rb.linearVelocity.y), ForceMode.Impulse);
+
+                itemHolding = null;
+                itemHolder.transform.DetachChildren();
+
+                startCounting = false;
+                ChargeContainer.SetActive(false);
+            }
+        }
+        #endregion
     }
 
     public void FixedUpdate()
@@ -292,8 +339,36 @@ public class Player : MonoBehaviour, IModifieable
     #endregion
 
     #region Actions
-    private void Hit()
+    private void Hit(float charge)
     {
+        if (itemHolding.TryGetComponent<Item>(out Item item) && hitting == false)
+        {
+            charge += 0.5f;
+            float chargedStrenght = strenght * charge;
+
+            StartCoroutine(HitAnimate(item, chargedStrenght));
+        }
+    }
+
+    public IEnumerator HitAnimate(Item item , float chargedStrenght)
+    {
+        float unchargedStrength = strenght;
+
+        itemHolderAnim.SetTrigger("Punching");
+
+        hitting = true;
+        strenght = chargedStrenght;
+        item.IsPunching(true);
+
+        // Wait until the animation state is fully played (normalizedTime >= 1)
+        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Animation has finished
+        Debug.Log("");
+
+        item.IsPunching(false);
+        hitting = false;
+        strenght = unchargedStrength;
 
     }
 
@@ -304,7 +379,10 @@ public class Player : MonoBehaviour, IModifieable
 
     private void Use()
     {
-
+        if (itemHolding.TryGetComponent<Item>(out Item item))
+        {
+            item.UseItem();
+        }
     }
     #endregion
 
@@ -362,12 +440,18 @@ public class Player : MonoBehaviour, IModifieable
             itemHolding.GetComponent<Rigidbody>().useGravity = false;
             itemHolding.GetComponent<Rigidbody>().freezeRotation = true;
             itemHolding.GetComponent<Collider>().enabled = false;
+
+            if (itemHolding.TryGetComponent<Item>(out Item item))
+            {
+                item.PlayerHolding(this);
+            }
         }
     }
 
     public void DropItem(InputAction.CallbackContext context)
     {
-        if (itemHolding != null && context.performed)
+
+        if (itemHolding != null && context.performed && hitting == false)
         {
             itemHolding.GetComponent<Rigidbody>().useGravity = true;
             itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
@@ -376,12 +460,51 @@ public class Player : MonoBehaviour, IModifieable
 
             itemHolding = null;
             itemHolder.transform.DetachChildren();
+
+            ChargeContainer.SetActive(false);
         }
     }
 
     public void HitInput(InputAction.CallbackContext context)
     {
+        float charge = 0;
+        
+        if (itemHolding != null && context.performed && hitting == false)
+        {
+            ChargeContainer.SetActive(true);
+            startCounting = true;
+        }
+        else if (itemHolding != null && context.canceled && hitting == false)
+        { 
+            #region Unholy amount of else if statements
+            if (chargeTime < 0.1)
+            {
+                charge = -0.4f;
+            }
+            else if (chargeTime < 0.3)
+            {
+                charge = 0;
+            }
+            else if (chargeTime < 0.7)
+            {
+                charge = 0.5f;
+            }
+            else if (chargeTime < 0.9)
+            {
+                charge = 0.75f;
+            }
+            else if (chargeTime > 0.9)
+            {
+                charge = 1f;
+            }
+            #endregion
 
+            Hit(charge);
+
+            startCounting = false;
+            ChargeContainer.SetActive(false);
+        }
+        
     }
 
     public void ThrowInput(InputAction.CallbackContext context)
@@ -391,12 +514,9 @@ public class Player : MonoBehaviour, IModifieable
 
     public void UseInput(InputAction.CallbackContext context)
     {
-        if(itemHolding != null)
+        if (itemHolding != null && context.performed && hitting == false)
         {
-            if(itemHolding.TryGetComponent<Item>(out Item item))
-            {
-                item.UseItem();
-            }
+            Use();
         }
     }
     #endregion

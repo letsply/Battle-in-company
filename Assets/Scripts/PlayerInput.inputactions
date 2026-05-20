@@ -76,7 +76,7 @@
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
-                    "initialStateCheck": false
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -237,7 +237,7 @@
                 {
                     "name": "",
                     "id": "b2a831f8-821e-4784-bb33-bf00e12aaad6",
-                    "path": "<Mouse>/leftButton",
+                    "path": "<Mouse>/rightButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -259,7 +259,7 @@
                 {
                     "name": "",
                     "id": "9649b3fe-0345-4408-9b44-857b823a85f3",
-                    "path": "<Mouse>/rightButton",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
