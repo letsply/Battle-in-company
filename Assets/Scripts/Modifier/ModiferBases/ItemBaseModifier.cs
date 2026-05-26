@@ -16,10 +16,17 @@ public class ItemBaseModifier : BaseModifier
     {
 
     }
+
     public virtual void OnItemHit(ref float damageMod)
     {
 
     }
+
+    public virtual void OnKnockback(ref float KnockbackMod)
+    {
+
+    }
+
     public virtual void OnItemUse()
     {
 

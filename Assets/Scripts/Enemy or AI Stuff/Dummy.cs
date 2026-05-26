@@ -1,21 +1,14 @@
-using System.Collections.Generic;
-using System;
 using UnityEngine;
 
-public class StandertMedium : EnemyBase
+public class Dummy : EnemyBase
 {
-
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    public void Start()
+    void Start()
     {
-
     }
 
     // Update is called once per frame
-    public void FixedUpdate()
+    void FixedUpdate()
     {
-
     }
-
-
 }

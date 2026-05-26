@@ -12,6 +12,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54059cb23f5acdb438319724d3bee0f8, type: 3}
   m_Name: Test
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  hardness: 0
-  weight: 1
-  handiness: 0
+  hardness: 0.867
+  weight: 10
+  handiness: 0.5

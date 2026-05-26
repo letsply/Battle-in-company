@@ -3,9 +3,14 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ItemData", menuName = "Scriptable Objects/ItemData")]
 public class ItemData : ScriptableObject
 {
+
+    [SerializeField] private int itemID;
+
     [SerializeField][Range(0,1)] private float hardness;
     [SerializeField] private float weight;
     [SerializeField] private float handiness;
+
+    public float ItemID() => itemID;
 
     public float Hardness() => hardness;
     public float Weight() => weight;

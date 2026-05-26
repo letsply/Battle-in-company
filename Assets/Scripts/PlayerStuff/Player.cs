@@ -22,7 +22,8 @@ public class Player : MonoBehaviour, IModifieable
     #region Values
 
     [Header("BaseValues")]
-    [SerializeField] private float strenght;
+    // Force in Newton
+    [SerializeField] private float strength;
     [SerializeField] private float health;
     [SerializeField] private float criticalDamageMultiplier;
 
@@ -51,6 +52,7 @@ public class Player : MonoBehaviour, IModifieable
     #region Set & Get Values
     public enum Values
     {
+        None,
         strength,
         health,
         criticalDamageMultiplier,
@@ -65,6 +67,7 @@ public class Player : MonoBehaviour, IModifieable
     }
     private string[] valueNames = new string[]
     {
+        "None",
         "strength",
         "health",
         "criticalDamageMultiplier",
@@ -95,6 +98,7 @@ public class Player : MonoBehaviour, IModifieable
 
     // Charging Atack stuff
     float chargeTime = 0;
+    float damageTime = 0;
     bool startCounting = false;
 
     bool hitting = false;
@@ -145,6 +149,7 @@ public class Player : MonoBehaviour, IModifieable
 
     public void Start()
     {
+
         stamina = maxStamina;
 
         ApplyModifiers();
@@ -170,22 +175,17 @@ public class Player : MonoBehaviour, IModifieable
         // if OverCharged
         if (itemHolding != null && chargeTime >= 1)
         {
-            // droping item if held to long
-            if (itemHolding != null)
-            {
-                itemHolding.GetComponent<Rigidbody>().useGravity = true;
-                itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
-                itemHolding.GetComponent<Collider>().enabled = true;
-                itemHolding.GetComponent<Rigidbody>().AddForce(moveDirection * (rb.linearVelocity.x + rb.linearVelocity.y), ForceMode.Impulse);
+            startCounting = false;
+            chargeTime = 0;
 
-                itemHolding = null;
-                itemHolder.transform.DetachChildren();
-
-                startCounting = false;
-                ChargeContainer.SetActive(false);
-            }
+            Drop();
         }
         #endregion
+
+        if(damageTime > 0)
+        {
+            damageTime -= Time.deltaTime;
+        }
     }
 
     public void FixedUpdate()
@@ -207,7 +207,11 @@ public class Player : MonoBehaviour, IModifieable
 
     public void TakeDmg(float dmg)
     {
-         health -= dmg;
+        if (damageTime <= 0)
+        {
+            health -= dmg;
+            damageTime = 0.5f;
+        }
     }
 
     #region Movement
@@ -339,12 +343,14 @@ public class Player : MonoBehaviour, IModifieable
     #endregion
 
     #region Actions
+
+    #region Hitting
     private void Hit(float charge)
     {
         if (itemHolding.TryGetComponent<Item>(out Item item) && hitting == false)
         {
             charge += 0.5f;
-            float chargedStrenght = strenght * charge;
+            float chargedStrenght = strength * charge;
 
             StartCoroutine(HitAnimate(item, chargedStrenght));
         }
@@ -352,36 +358,87 @@ public class Player : MonoBehaviour, IModifieable
 
     public IEnumerator HitAnimate(Item item , float chargedStrenght)
     {
-        float unchargedStrength = strenght;
+        float unchargedStrength = strength;
 
         itemHolderAnim.SetTrigger("Punching");
 
         hitting = true;
-        strenght = chargedStrenght;
+        strength = chargedStrenght;
         item.IsPunching(true);
+        itemHolding.GetComponent<Collider>().enabled = true;
+        itemHolding.GetComponent<Collider>().isTrigger = true;
 
         // Wait until the animation state is fully played (normalizedTime >= 1)
         yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
 
         // Animation has finished
-        Debug.Log("");
 
+        itemHolding.GetComponent<Collider>().enabled = false;
+        itemHolding.GetComponent<Collider>().isTrigger = false;
         item.IsPunching(false);
         hitting = false;
-        strenght = unchargedStrength;
+        strength = unchargedStrength;
 
     }
 
-    private void Throw()
+    #endregion
+
+    #region Throwing
+    private void Throw(float charge)
     {
+        if (itemHolding.TryGetComponent<Item>(out Item item) && hitting == false)
+        {
+            charge += 0.5f;
+            float chargedStrenght = strength * charge;
 
+            StartCoroutine(ThrowAnimate(item,chargedStrenght));
+        }
     }
+
+    public IEnumerator ThrowAnimate(Item item, float chargedStrenght)
+    {
+        itemHolderAnim.SetTrigger("Throwing");
+
+        // Wait until the animation state is fully played (normalizedTime >= 1)
+        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Animation has finished
+        itemHolding.GetComponent<Rigidbody>().useGravity = true;
+        itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
+        itemHolding.GetComponent<Collider>().enabled = true;
+
+        itemHolder.transform.DetachChildren();
+
+        float a = chargedStrenght / itemHolding.GetComponent<Rigidbody>().mass;
+        float v = Mathf.Sqrt(2 * a * 0.5f);
+        itemHolding.GetComponent<Rigidbody>().AddForce(v * Cam.transform.TransformDirection(Vector3.forward) + new Vector3(0,0.5f),ForceMode.VelocityChange);
+
+        itemHolding = null;
+    }
+
+    #endregion 
 
     private void Use()
     {
         if (itemHolding.TryGetComponent<Item>(out Item item))
         {
             item.UseItem();
+        }
+    }
+
+    private void Drop()
+    {
+        if (itemHolding != null && hitting == false)
+        {
+            itemHolding.GetComponent<Rigidbody>().useGravity = true;
+            itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
+            itemHolding.GetComponent<Collider>().enabled = true;
+            itemHolding.GetComponent<Rigidbody>().AddForce(moveDirection * (rb.linearVelocity.x + rb.linearVelocity.y), ForceMode.Impulse);
+
+            itemHolding = null;
+            itemHolder.transform.DetachChildren();
+
+            ChargeContainer.SetActive(false);
         }
     }
     #endregion
@@ -450,18 +507,9 @@ public class Player : MonoBehaviour, IModifieable
 
     public void DropItem(InputAction.CallbackContext context)
     {
-
-        if (itemHolding != null && context.performed && hitting == false)
+        if (context.performed)
         {
-            itemHolding.GetComponent<Rigidbody>().useGravity = true;
-            itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
-            itemHolding.GetComponent<Collider>().enabled = true;
-            itemHolding.GetComponent<Rigidbody>().AddForce(moveDirection * (rb.linearVelocity.x + rb.linearVelocity.y) , ForceMode.Impulse);
-
-            itemHolding = null;
-            itemHolder.transform.DetachChildren();
-
-            ChargeContainer.SetActive(false);
+            Drop();
         }
     }
 
@@ -474,7 +522,7 @@ public class Player : MonoBehaviour, IModifieable
             ChargeContainer.SetActive(true);
             startCounting = true;
         }
-        else if (itemHolding != null && context.canceled && hitting == false)
+        else if (itemHolding != null && context.canceled && hitting == false && startCounting == true)
         { 
             #region Unholy amount of else if statements
             if (chargeTime < 0.1)
@@ -499,17 +547,55 @@ public class Player : MonoBehaviour, IModifieable
             }
             #endregion
 
-            Hit(charge);
-
             startCounting = false;
             ChargeContainer.SetActive(false);
+
+            Hit(charge);
+
         }
         
     }
 
     public void ThrowInput(InputAction.CallbackContext context)
     {
+        float charge = 0;
 
+        if (itemHolding != null && context.performed && hitting == false)
+        {
+            ChargeContainer.SetActive(true);
+            startCounting = true;
+        }
+        else if (itemHolding != null && context.canceled && hitting == false && startCounting == true)
+        {
+            #region Unholy amount of else if statements
+            if (chargeTime < 0.1)
+            {
+                charge = -0.4f;
+            }
+            else if (chargeTime < 0.3)
+            {
+                charge = 0;
+            }
+            else if (chargeTime < 0.7)
+            {
+                charge = 0.5f;
+            }
+            else if (chargeTime < 0.9)
+            {
+                charge = 0.75f;
+            }
+            else if (chargeTime > 0.9)
+            {
+                charge = 1f;
+            }
+            #endregion
+
+            startCounting = false;
+            ChargeContainer.SetActive(false);
+
+            Throw(charge);
+
+        }
     }
 
     public void UseInput(InputAction.CallbackContext context)

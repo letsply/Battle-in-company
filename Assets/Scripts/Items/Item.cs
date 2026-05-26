@@ -12,6 +12,7 @@ public class Item : MonoBehaviour, IModifieable
 
     #region standerdValues
     [SerializeField] private ItemData itemData;
+    public ItemData ItemsData() => itemData;
 
     // Values
     private float hardness;
@@ -62,32 +63,40 @@ public class Item : MonoBehaviour, IModifieable
                 mod.OnItemUse();
             }
         }
-        Debug.Log("jlewb");
     }
 
     void FixedUpdate()
     {
         // Check Velocity if itemIsHeld or if playerIsUsing it to determin if the item can hurt
-        if (velocity >= 1 && itemIsHeld == false || velocity >= 1 && isPunching)
+        if (velocity >= 1 && itemIsHeld == false || isPunching)
         { itemCanHurt = true; }
         else
         { itemCanHurt = false; }
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collision)
     {
         // Asking what is hit and if action has to be done
         if (itemCanHurt && collision.transform.tag == "Player")
         {
             // ask if item is punched with or if its thrown
-            if (isPunching)
+            if (isPunching && collision.gameObject != playerHolding)
             {
                 float damage = 0;
                 // calc damage and the crit chance
+                // damage = 0.5 * weight * the velocity you would get with the weight of the object and 0.5m of assumed traveling time
                 if (enemyHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetValue<float>(Player.Values.strength), 2) * hardness; }
+                {
+                    float a = playerHolding.GetValue<float>(Player.Values.strength) / weight;
+                    float v = Mathf.Sqrt(2 * a * 0.5f);
+                    damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness; 
+                }
                 else if ( playerHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetValue<float>(EnemyBase.Values.strength), 2) * hardness; }
+                {
+                    float a = enemyHolding.GetValue<float>(EnemyBase.Values.strength) / weight;
+                    float v = Mathf.Sqrt(2 * a * 0.5f);
+                    damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
+                }
 
                 float critchance = handiness;
                 // modify damage and critchance
@@ -104,21 +113,11 @@ public class Item : MonoBehaviour, IModifieable
                     else if (playerHolding == null)
                     { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
                 }
-                // let the player take dmg
-                collision.transform.GetComponent<Player>().TakeDmg(damage);
-            }
-            else // if thrown do 
-            {
-                float damage = 1 / 2 * weight * Mathf.Pow(velocity, 2) * hardness;
-
-                foreach (var mod in itemModifiers)
-                {
-                    mod.OnItemHit(ref damage);
-                }
+                // let the Enemy take dmg and divide it by 10 to hold the numbers small
+                damage /= 10;
 
                 collision.transform.GetComponent<Player>().TakeDmg(damage);
             }
-
 
             // in the end apply effects to Player
             foreach (var mod in itemModifiers)
@@ -133,11 +132,19 @@ public class Item : MonoBehaviour, IModifieable
             {
                 // calc damage and the crit chance
                 float damage = 0;
-                if (enemyHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(playerHolding.GetValue<float>(Player.Values.strength), 2) * hardness; }
-                else if (playerHolding == null)
-                { damage = 1 / 2 * weight * Mathf.Pow(enemyHolding.GetValue<float>(EnemyBase.Values.strength), 2) * hardness; }
 
+                if (enemyHolding == null)
+                {
+                    float a = playerHolding.GetValue<float>(Player.Values.strength) / weight;
+                    float v = Mathf.Sqrt(2 * a * 0.5f);
+                    damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
+                }
+                else if (playerHolding == null)
+                {
+                    float a = enemyHolding.GetValue<float>(EnemyBase.Values.strength) / weight;
+                    float v = Mathf.Sqrt(2 * a * 0.5f);
+                    damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
+                }
                 float critchance = handiness;
 
                 // modify damage and critchance
@@ -156,26 +163,82 @@ public class Item : MonoBehaviour, IModifieable
                     { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
                 }
 
-                // let the Enemy take dmg
+                // let the Enemy take dmg and divide it by 10 to hold the numbers small
+                damage /= 10;
+
                 collision.transform.GetComponent<EnemyBase>().TakeDmg(damage);
             }
-            else // if thrown do 
+        }
+
+        if (collision.gameObject.GetComponent<Rigidbody>() != null)
+        {
+            Vector3 direction = new Vector3();
+            if(playerHolding == null)
+            { direction = enemyHolding.GetComponent<Transform>().transform.TransformDirection(Vector3.forward); }
+            else
+            { direction = playerHolding.GetComponent<Transform>().transform.TransformDirection(Vector3.forward); }
+
+            //making enemy bounce a bit
+            direction += new Vector3(0,weight * 1.5f);
+
+            float force = 0;
+
+            if (enemyHolding == null)
+            { force = playerHolding.GetValue<float>(Player.Values.strength); }
+            else if (playerHolding == null)
+            { force = enemyHolding.GetValue<float>(EnemyBase.Values.strength); }
+
+            foreach (var mod in itemModifiers)
             {
-                float damage = 1 / 2 * weight * Mathf.Pow(velocity, 2) * hardness;
+                mod.OnKnockback(ref force);
+            }
 
-                foreach (var mod in itemModifiers)
-                {
-                    mod.OnItemHit(ref damage);
-                }
+            collision.gameObject.GetComponent<Rigidbody>().AddForce(force * direction, ForceMode.Force);
+        }
+    }
 
-                collision.transform.GetComponent<Player>().TakeDmg(damage);
-           
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (itemCanHurt && collision.transform.tag == "Player")
+        {
 
-                // in the end apply effect to Enemy
-                foreach (var mod in itemModifiers)
-                {
-                    mod.GiveEffect(null, collision.transform.GetComponent<EnemyBase>());
-                }
+            float damage = (1f / 2f) * weight * Mathf.Pow(velocity, 2) * hardness;
+
+            foreach (var mod in itemModifiers)
+            {
+                mod.OnItemHit(ref damage);
+            }
+
+            // let the Enemy take dmg and divide it by 10 to hold the numbers small
+            damage /= 10;
+
+            collision.transform.GetComponent<Player>().TakeDmg(damage);
+
+            // in the end apply effect to Enemy
+            foreach (var mod in itemModifiers)
+            {
+                mod.GiveEffect(collision.transform.GetComponent<Player>(), null);
+            }
+        }
+        else if (itemCanHurt && collision.transform.tag == "Enemy")
+        {
+            float damage = (1f / 2f) * weight * Mathf.Pow(velocity, 2) * hardness;
+
+            foreach (var mod in itemModifiers)
+            {
+                mod.OnItemHit(ref damage);
+            }
+
+            // let the Enemy take dmg and divide it by 10 to hold the numbers small
+            damage /= 10;
+
+            collision.transform.GetComponent<EnemyBase>().TakeDmg(damage);
+
+
+            // in the end apply effect to Enemy
+            foreach (var mod in itemModifiers)
+            {
+                mod.GiveEffect(null, collision.transform.GetComponent<EnemyBase>());
             }
         }
     }
