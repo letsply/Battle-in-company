@@ -7,8 +7,18 @@ public class Item : MonoBehaviour, IModifieable
     private Player playerHolding;
     public void PlayerHolding(Player player) { playerHolding = player; }
 
-    private EnemyBase enemyHolding;
-    public void EnemyHolding(EnemyBase enemy) { enemyHolding = enemy; }
+    private StateMachineControler enemyHolding;
+    public void EnemyHolding(StateMachineControler enemy) { enemyHolding = enemy; }
+    public bool ItemIsHeld() 
+    {
+        if (playerHolding != null || enemyHolding != null) 
+        { return true; }
+
+        else if(playerHolding == null && enemyHolding == null)
+        { return false; }
+
+        return true;
+    }
 
     #region standerdValues
     [SerializeField] private ItemData itemData;
@@ -93,7 +103,7 @@ public class Item : MonoBehaviour, IModifieable
                 }
                 else if ( playerHolding == null)
                 {
-                    float a = enemyHolding.GetValue<float>(EnemyBase.Values.strength) / weight;
+                    float a = enemyHolding.GetValue<float>(StateMachineControler.Values.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
                 }
@@ -111,7 +121,7 @@ public class Item : MonoBehaviour, IModifieable
                     if (enemyHolding == null)
                     { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
+                    { damage *= enemyHolding.GetValue<float>(StateMachineControler.Values.criticalDamageMultiplier); }
                 }
                 // let the Enemy take dmg and divide it by 10 to hold the numbers small
                 damage /= 10;
@@ -141,7 +151,7 @@ public class Item : MonoBehaviour, IModifieable
                 }
                 else if (playerHolding == null)
                 {
-                    float a = enemyHolding.GetValue<float>(EnemyBase.Values.strength) / weight;
+                    float a = enemyHolding.GetValue<float>(StateMachineControler.Values.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
                 }
@@ -160,13 +170,13 @@ public class Item : MonoBehaviour, IModifieable
                     if (enemyHolding == null)
                     { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetValue<float>(EnemyBase.Values.criticalDamageMultiplier); }
+                    { damage *= enemyHolding.GetValue<float>(StateMachineControler.Values.criticalDamageMultiplier); }
                 }
 
                 // let the Enemy take dmg and divide it by 10 to hold the numbers small
                 damage /= 10;
 
-                collision.transform.GetComponent<EnemyBase>().TakeDmg(damage);
+                collision.transform.GetComponent<StateMachineControler>().TakeDmg(damage);
             }
         }
 
@@ -186,7 +196,7 @@ public class Item : MonoBehaviour, IModifieable
             if (enemyHolding == null)
             { force = playerHolding.GetValue<float>(Player.Values.strength); }
             else if (playerHolding == null)
-            { force = enemyHolding.GetValue<float>(EnemyBase.Values.strength); }
+            { force = enemyHolding.GetValue<float>(StateMachineControler.Values.strength); }
 
             foreach (var mod in itemModifiers)
             {
@@ -232,13 +242,13 @@ public class Item : MonoBehaviour, IModifieable
             // let the Enemy take dmg and divide it by 10 to hold the numbers small
             damage /= 10;
 
-            collision.transform.GetComponent<EnemyBase>().TakeDmg(damage);
+            collision.transform.GetComponent<StateMachineControler>().TakeDmg(damage);
 
 
             // in the end apply effect to Enemy
             foreach (var mod in itemModifiers)
             {
-                mod.GiveEffect(null, collision.transform.GetComponent<EnemyBase>());
+                mod.GiveEffect(null, collision.transform.GetComponent<StateMachineControler>());
             }
         }
     }

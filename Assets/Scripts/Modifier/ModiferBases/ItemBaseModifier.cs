@@ -31,7 +31,7 @@ public class ItemBaseModifier : BaseModifier
     {
 
     }
-    public void GiveEffect(Player player, EnemyBase enemy)
+    public void GiveEffect(Player player, StateMachineControler enemy)
     {
         if (effects != null && enemy == null)
         {

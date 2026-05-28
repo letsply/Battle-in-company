@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SearchForItem : BaseState
@@ -32,9 +33,18 @@ public class SearchForItem : BaseState
 
     protected override void StartOverride()
     {
-        foreach (var item in FindObjectsByType<Item>(FindObjectsSortMode.None))
+        Search();
+    }
+
+    private void Search()
+    {
+        items.Clear();
+        foreach (var item in MonoBehaviour.FindObjectsByType<Item>(FindObjectsSortMode.None))
         {
-            items.Add(item);
+            if (item.ItemIsHeld() == false)
+            {
+                items.Add(item);
+            }
         }
         if (items.Count == 0)
         {
@@ -43,12 +53,29 @@ public class SearchForItem : BaseState
         else
         {
             items.Sort((x, y) => nearestWeight(diseredWeight, x, y));
-            items[0]
+            SMC.SetDestination(items[0].GetComponent<Transform>(),false);
         }
     }
 
     protected override void UpdateOverride()
     {
+
+        if (SMC.ItemHolding() == null)
+        {
+            if (items[0].ItemIsHeld())
+            {
+                Search();
+            }
+
+            if (SMC.Agent().remainingDistance <= 2)
+            {
+                SMC.Take();
+            }
+        }
+        else
+        {
+            SMC.SwitchState(StateMachineControler.States.Idle);
+        }
         
     }
 }

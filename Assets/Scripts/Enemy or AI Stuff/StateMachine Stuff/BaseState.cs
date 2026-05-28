@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public abstract class BaseState : MonoBehaviour
+public abstract class BaseState 
 {
     protected StateMachineControler SMC;
 

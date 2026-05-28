@@ -1,14 +1,16 @@
 using UnityEngine;
 
-public class Dummy : EnemyBase
+public class Dummy : StateMachineControler
 {
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public override void Start()
     {
+        base.Start();
     }
 
     // Update is called once per frame
-    void FixedUpdate()
+    public override void FixedUpdate()
     {
+        base.FixedUpdate();
     }
 }
