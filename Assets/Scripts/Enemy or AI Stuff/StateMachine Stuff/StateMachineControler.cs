@@ -190,6 +190,11 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         {
             damageTime -= Time.deltaTime;
         }
+
+        if(itemHolding != null)
+        {
+            itemHolding.transform.position = itemHolder.transform.position;
+        }
     }
 
     public virtual void FixedUpdate()
@@ -269,12 +274,12 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     public void SetDestination(Transform newDestination, bool isAttackingTarget)
     {
         destination = newDestination.position;
-        agent.destination = destination;
 
         if (isAttackingTarget)
         {
             attackingTarget = newDestination;
         }
+        agent.destination = destination;
     }
 
     public void TakeDmg(float dmg)

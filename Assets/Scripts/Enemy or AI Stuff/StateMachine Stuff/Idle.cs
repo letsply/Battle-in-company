@@ -4,7 +4,7 @@ public class Idle : BaseState
 {
     protected override void StartOverride()
     {
-        if (MonoBehaviour.FindAnyObjectByType(typeof(Item)) != null && MonoBehaviour.FindAnyObjectByType(typeof(Player)) != null)
+        if (MonoBehaviour.FindAnyObjectByType<Item>() != null && MonoBehaviour.FindAnyObjectByType<Player>() != null)
         {
             if (SMC.ItemHolding() == null)
             {

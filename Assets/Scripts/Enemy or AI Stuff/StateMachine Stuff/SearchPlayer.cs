@@ -5,7 +5,7 @@ public class SearchPlayer : BaseState
 {
 
     private List<Player> players = new List<Player>();
-    private static int nearestPlayer(Player x, Player y,StateMachineControler stateMachine)
+    private static int nearestPlayer(Player x, Player y,Vector3 stateMachine)
     {
         if (x == null)
         {
@@ -14,15 +14,14 @@ public class SearchPlayer : BaseState
             else
             { return -1; }
         }
-
         else
         {
             if (y == null)
             { return 1; }
             else
             {
-                float dist1 = Vector3.Distance(stateMachine.transform.position, x.transform.position);
-                float dist2 = Vector3.Distance(stateMachine.transform.position, y.transform.position);
+                float dist1 = Vector3.Distance(stateMachine, x.transform.position);
+                float dist2 = Vector3.Distance(stateMachine, y.transform.position);
                 return dist1.CompareTo(dist2);
             }
         }
@@ -46,10 +45,14 @@ public class SearchPlayer : BaseState
         }
         else
         {
-            players.Sort((x, y) => nearestPlayer(x, y, SMC));
-            SMC.SetDestination(players[0].GetComponent<Transform>(), true);
+            if (players.Count >= 2)
+            {
+                players.Sort((x, y) => nearestPlayer(x, y, SMC.transform.position));
+            }
+            Transform destination = players[0].GetComponent<Transform>() as Transform;
+            SMC.SetDestination(destination, true);
 
-            SMC.SwitchState(StateMachineControler.States.Attack);
+            // SMC.SwitchState(StateMachineControler.States.Attack);
         }
     }
     
