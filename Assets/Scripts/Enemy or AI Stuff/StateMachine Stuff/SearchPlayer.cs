@@ -41,7 +41,7 @@ public class SearchPlayer : BaseState
         }
         if (players.Count == 0)
         {
-            SMC.SwitchState(StateMachineControler.States.Idle);
+            EndState();
         }
         else
         {
@@ -52,7 +52,7 @@ public class SearchPlayer : BaseState
             Transform destination = players[0].GetComponent<Transform>() as Transform;
             SMC.SetDestination(destination, true);
 
-            // SMC.SwitchState(StateMachineControler.States.Attack);
+            EndState();
         }
     }
     

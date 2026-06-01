@@ -19,11 +19,18 @@ public class Attack : BaseState
         float distance = Vector3.Distance(SMC.Agent().destination, SMC.transform.position);
         if (attackType == StateMachineControler.AttackType.CloseRange)
         {
-            while (stratagie == StateMachineControler.StratagieType.Strategic)
+            if (stratagie == StateMachineControler.StratagieType.Strategic)
             {
                 if (SMC.GetValue<float>(StateMachineControler.Values.range) > distance)
                 {
-
+                    SMC.Agent().stoppingDistance = SMC.GetValue<float>(StateMachineControler.Values.range);
+                    SMC.Hit();
+                    EndState();
+                }
+                else
+                {
+                    SMC.Agent().destination = SMC.GetValue<Transform>(StateMachineControler.Values.attackingTarget).position;
+                    SMC.Agent().stoppingDistance = 1;
                 }
             }
         }
@@ -36,5 +43,11 @@ public class Attack : BaseState
 
         }
     }
+
+    protected override void EndState()
+    {
+        SMC.SwitchState(StateMachineControler.States.Evade);
+    }
+
 
 }

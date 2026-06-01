@@ -26,5 +26,9 @@ public abstract class BaseState
         
     }
 
+    protected virtual void EndState()
+    {
+        SMC.SwitchState(StateMachineControler.States.Idle);
+    }
 
 }

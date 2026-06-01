@@ -48,7 +48,7 @@ public class SearchForItem : BaseState
         }
         if (items.Count == 0)
         {
-            SMC.SwitchState(StateMachineControler.States.Idle);
+            EndState();
         }
         else
         {
@@ -74,7 +74,7 @@ public class SearchForItem : BaseState
         }
         else
         {
-            SMC.SwitchState(StateMachineControler.States.Idle);
+            EndState();
         }
         
     }

@@ -12,7 +12,14 @@ public class Idle : BaseState
             }
             else
             {
-                SMC.SwitchState(StateMachineControler.States.SearchPlayer);
+                if (SMC.GetValue<Transform>(StateMachineControler.Values.attackingTarget) == null)
+                {
+                    SMC.SwitchState(StateMachineControler.States.SearchPlayer);
+                }
+                else
+                {
+                    SMC.SwitchState(StateMachineControler.States.Attack);
+                }
             }
         }
     }

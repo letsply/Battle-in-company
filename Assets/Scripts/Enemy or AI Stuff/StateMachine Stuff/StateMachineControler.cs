@@ -71,7 +71,8 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         jumpForce,
         jumps,
         airResistance,
-        range
+        range,
+        attackingTarget,
     }
     protected string[] valueNames = new string[]
     {
@@ -86,7 +87,8 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         "jumpForce",
         "jumps",
         "airResistance",
-        "attackRange"
+        "attackRange",
+        "attackingTarget",
     };
 
     public T GetValue<T>(Values valueName)
@@ -108,7 +110,6 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     #region StateMachine
     protected Transform attackingTarget;
 
-    protected Vector3 destination;
     protected GameObject itemHolding;
     protected BaseState currentState;
     public enum States
@@ -116,7 +117,8 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         Idle,
         SearchForItem,
         SearchPlayer,
-        Attack
+        Attack,
+        Evade
     }
 
     [SerializeField] private AttackType attackType;
@@ -137,7 +139,7 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
 
     protected List<BaseState> baseStates = new List<BaseState>();
 
-#endregion
+    #endregion
 
     #region ModifierStuff
     protected List<AIBaseModifier> enemyModifiers = new List<AIBaseModifier>();
@@ -164,17 +166,21 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
 
     public virtual void Start()
     {
+        rb.linearDamping = airResistance;
+
         ApplyModifiers();
 
         Idle idle = new Idle();
         SearchForItem item = new SearchForItem();
         SearchPlayer player = new SearchPlayer();
-        SearchPlayer attack = new SearchPlayer();
+        Attack attack = new Attack();
+        Evade evade = new Evade();
 
         baseStates.Add(idle);
         baseStates.Add(item);
         baseStates.Add(player);
         baseStates.Add(attack);
+        baseStates.Add(evade);
 
         SwitchState(States.Idle);
     }
@@ -245,10 +251,14 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         hitting = true;
         item.IsPunching(true);
 
+        itemHolding.GetComponent<Collider>().enabled = true;
+        itemHolding.GetComponent<Collider>().isTrigger = true;
         // Wait until the animation state is fully played (normalizedTime >= 1)
         yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
 
         // Animation has finished
+        itemHolding.GetComponent<Collider>().enabled = false;
+        itemHolding.GetComponent<Collider>().isTrigger = false;
         item.IsPunching(false);
         hitting = false;
     }
@@ -273,13 +283,11 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
 
     public void SetDestination(Transform newDestination, bool isAttackingTarget)
     {
-        destination = newDestination.position;
-
         if (isAttackingTarget)
         {
             attackingTarget = newDestination;
         }
-        agent.destination = destination;
+        agent.destination = newDestination.position;
     }
 
     public void TakeDmg(float dmg)
