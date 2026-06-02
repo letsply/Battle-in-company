@@ -4,6 +4,8 @@ using UnityEngine.Rendering.Universal;
 
 public class Item : MonoBehaviour, IModifieable
 {
+
+    #region get&setPlayer/Enemy
     private Player playerHolding;
     public void PlayerHolding(Player player) { playerHolding = player; }
 
@@ -19,6 +21,7 @@ public class Item : MonoBehaviour, IModifieable
 
         return true;
     }
+    #endregion
 
     #region standerdValues
     [SerializeField] private ItemData itemData;
@@ -37,11 +40,25 @@ public class Item : MonoBehaviour, IModifieable
     public bool IsPunching(bool isitPunching) => isPunching = isitPunching;
     #endregion
 
+
     private List<ItemBaseModifier> itemModifiers = new List<ItemBaseModifier>();
+    public bool ItemIsUsable()
+    {
+        bool anyModierHasUse = false;
+        foreach (var mod in itemModifiers)
+        {
+            if (mod.HasUse())
+            {
+                anyModierHasUse = true;
+            }
+        }
+        return anyModierHasUse;
+    }
 
     // Get rb and velocity 
     private Rigidbody rb { get => GetComponent<Rigidbody>(); }
     private float velocity { get => Mathf.Abs(rb.linearVelocity.x) + Mathf.Abs(rb.linearVelocity.z) + Mathf.Abs(rb.linearVelocity.y); }
+
 
     private void Start()
     {
@@ -89,8 +106,8 @@ public class Item : MonoBehaviour, IModifieable
         // Asking what is hit and if action has to be done
         if (itemCanHurt && collision.transform.tag == "Player")
         {
-            // ask if item is punched with or if its thrown
-            if (isPunching && collision.gameObject != playerHolding)
+            // ask if item is not hitting self
+            if (collision.gameObject.GetComponent<Player>() != playerHolding)
             {
                 float damage = 0;
                 // calc damage and the crit chance
@@ -137,8 +154,8 @@ public class Item : MonoBehaviour, IModifieable
         }
         else if (itemCanHurt && collision.transform.tag == "Enemy")
         {
-            // ask if item is punched with or if its thrown
-            if (isPunching)
+            // ask if item is not hitting self
+            if (collision.gameObject.GetComponent<StateMachineControler>() != enemyHolding)
             {
                 // calc damage and the crit chance
                 float damage = 0;
@@ -180,7 +197,7 @@ public class Item : MonoBehaviour, IModifieable
             }
         }
 
-        if (collision.gameObject.GetComponent<Rigidbody>() != null)
+        if (collision.gameObject.GetComponent<Rigidbody>() != null && itemIsHeld)
         {
             Vector3 direction = new Vector3();
             if(playerHolding == null)

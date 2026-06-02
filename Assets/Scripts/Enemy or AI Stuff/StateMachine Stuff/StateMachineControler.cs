@@ -220,19 +220,23 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     public void Take()
     {
         Collider[] hitColliders = Physics.OverlapBox(itemHolder.transform.position, new Vector3(grabbingRange, GetComponent<CapsuleCollider>().height, grabbingRange), Quaternion.identity, itemLayer);
-        // first collider in array gets used
-        itemHolding = hitColliders[0].transform.gameObject;
-        itemHolding.transform.parent = itemHolder.transform;
-        itemHolding.transform.position = itemHolder.transform.position;
-        itemHolding.transform.rotation = itemHolder.transform.rotation;
 
-        itemHolding.GetComponent<Rigidbody>().useGravity = false;
-        itemHolding.GetComponent<Rigidbody>().freezeRotation = true;
-        itemHolding.GetComponent<Collider>().enabled = false;
-
-        if (itemHolding.TryGetComponent<Item>(out Item item))
+        if (hitColliders != null)
         {
-            item.EnemyHolding(this);
+            // first collider in array gets used
+            itemHolding = hitColliders[0].transform.gameObject;
+            itemHolding.transform.parent = itemHolder.transform;
+            itemHolding.transform.position = itemHolder.transform.position;
+            itemHolding.transform.rotation = itemHolder.transform.rotation;
+
+            itemHolding.GetComponent<Rigidbody>().useGravity = false;
+            itemHolding.GetComponent<Rigidbody>().freezeRotation = true;
+            itemHolding.GetComponent<Collider>().enabled = false;
+
+            if (itemHolding.TryGetComponent<Item>(out Item item))
+            {
+                item.EnemyHolding(this);
+            }
         }
     }
 
@@ -265,7 +269,31 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
 
     public void Throw()
     {
+        if (itemHolding.TryGetComponent<Item>(out Item item) && hitting == false)
+        {
+            StartCoroutine(ThrowAnimate(item));
+        }
+    }
 
+    public IEnumerator ThrowAnimate(Item item)
+    {
+        itemHolderAnim.SetTrigger("Throwing");
+
+        // Wait until the animation state is fully played (normalizedTime >= 1)
+        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Animation has finished
+        itemHolding.GetComponent<Rigidbody>().useGravity = true;
+        itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
+        itemHolding.GetComponent<Collider>().enabled = true;
+
+        itemHolder.transform.DetachChildren();
+
+        float a = strength / itemHolding.GetComponent<Rigidbody>().mass;
+        float v = Mathf.Sqrt(2 * a * 0.5f);
+        itemHolding.GetComponent<Rigidbody>().AddForce(v * transform.TransformDirection(Vector3.forward) + new Vector3(0, 0.5f), ForceMode.VelocityChange);
+
+        itemHolding = null;
     }
 
     public void Use()

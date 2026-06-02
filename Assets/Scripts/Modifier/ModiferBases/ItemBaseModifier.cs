@@ -6,6 +6,8 @@ public class ItemBaseModifier : BaseModifier
 {
     protected Item item;
     protected List<BaseEffect> effects = new List<BaseEffect>();
+    protected bool hasUse;
+    public bool HasUse() => hasUse;
 
     public void FindItem(Item itemToMod)
     {
