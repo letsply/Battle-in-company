@@ -13,10 +13,7 @@ public class Item : MonoBehaviour, IModifieable
     public void EnemyHolding(StateMachineControler enemy) { enemyHolding = enemy; }
     public bool ItemIsHeld() 
     {
-        if (playerHolding != null || enemyHolding != null) 
-        { return true; }
-
-        else if(playerHolding == null && enemyHolding == null)
+        if(playerHolding == null && enemyHolding == null)
         { return false; }
 
         return true;
@@ -114,13 +111,13 @@ public class Item : MonoBehaviour, IModifieable
                 // damage = 0.5 * weight * the velocity you would get with the weight of the object and 0.5m of assumed traveling time
                 if (enemyHolding == null)
                 {
-                    float a = playerHolding.GetValue<float>(Player.Values.strength) / weight;
+                    float a = playerHolding.GetValue<float>(PlayerValues.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness; 
                 }
                 else if ( playerHolding == null)
                 {
-                    float a = enemyHolding.GetValue<float>(StateMachineControler.Values.strength) / weight;
+                    float a = enemyHolding.GetValue<float>(EnemyValues.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
                 }
@@ -136,9 +133,9 @@ public class Item : MonoBehaviour, IModifieable
                 if (crit <= critchance)
                 {
                     if (enemyHolding == null)
-                    { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
+                    { damage *= playerHolding.GetValue<float>(PlayerValues.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetValue<float>(StateMachineControler.Values.criticalDamageMultiplier); }
+                    { damage *= enemyHolding.GetValue<float>(EnemyValues.criticalDamageMultiplier); }
                 }
                 // let the Enemy take dmg and divide it by 10 to hold the numbers small
                 damage /= 10;
@@ -162,13 +159,13 @@ public class Item : MonoBehaviour, IModifieable
 
                 if (enemyHolding == null)
                 {
-                    float a = playerHolding.GetValue<float>(Player.Values.strength) / weight;
+                    float a = playerHolding.GetValue<float>(PlayerValues.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
                 }
                 else if (playerHolding == null)
                 {
-                    float a = enemyHolding.GetValue<float>(StateMachineControler.Values.strength) / weight;
+                    float a = enemyHolding.GetValue<float>(EnemyValues.strength) / weight;
                     float v = Mathf.Sqrt(2 * a * 0.5f);
                     damage = (1f / 2f) * weight * Mathf.Pow(v, 2) * hardness;
                 }
@@ -185,9 +182,9 @@ public class Item : MonoBehaviour, IModifieable
                 if (crit <= critchance)
                 {
                     if (enemyHolding == null)
-                    { damage *= playerHolding.GetValue<float>(Player.Values.criticalDamageMultiplier); }
+                    { damage *= playerHolding.GetValue<float>(PlayerValues.criticalDamageMultiplier); }
                     else if (playerHolding == null)
-                    { damage *= enemyHolding.GetValue<float>(StateMachineControler.Values.criticalDamageMultiplier); }
+                    { damage *= enemyHolding.GetValue<float>(EnemyValues.criticalDamageMultiplier); }
                 }
 
                 // let the Enemy take dmg and divide it by 10 to hold the numbers small
@@ -211,9 +208,9 @@ public class Item : MonoBehaviour, IModifieable
             float force = 0;
 
             if (enemyHolding == null)
-            { force = playerHolding.GetValue<float>(Player.Values.strength); }
+            { force = playerHolding.GetValue<float>(PlayerValues.strength); }
             else if (playerHolding == null)
-            { force = enemyHolding.GetValue<float>(StateMachineControler.Values.strength); }
+            { force = enemyHolding.GetValue<float>(EnemyValues.strength); }
 
             foreach (var mod in itemModifiers)
             {

@@ -3,9 +3,24 @@ using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.LowLevelPhysics2D;
 using UnityEngine.UI;
-using static UnityEditor.Progress;
+
+public enum PlayerValues
+{
+    strength,
+    health,
+    criticalDamageMultiplier,
+    speed,
+    sprintingSpeed,
+    stamina,
+    staminaRegain,
+    infinitStamina,
+    maxStamina,
+    jumpForce,
+    jumps,
+    maxJumps,
+    airResistance,
+}
 
 public class Player : MonoBehaviour, IModifieable
 {
@@ -50,45 +65,14 @@ public class Player : MonoBehaviour, IModifieable
     #endregion
 
     #region Set & Get Values
-    public enum Values
+    public T GetValue<T>(PlayerValues valueName)
     {
-        None,
-        strength,
-        health,
-        criticalDamageMultiplier,
-        speed,
-        sprintingSpeed,
-        stamina,
-        staminaRegain,
-        infinitStamina,
-        jumpForce,
-        jumps,
-        airResistance,
-    }
-    private string[] valueNames = new string[]
-    {
-        "None",
-        "strength",
-        "health",
-        "criticalDamageMultiplier",
-        "speed",
-        "sprintingSpeed",
-        "stamina",
-        "staminaRegain",
-        "infinitStamina",
-        "jumpForce",
-        "jumps",
-        "airResistance",
-    };
-
-    public T GetValue<T>(Values valueName)
-    {
-        string name = valueNames[(int)valueName];
+        string name = valueName.ToString();
         var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
         return (T)field.GetValue(this);
     }
 
-    public void SetValue<T>(Values valueName, T value)
+    public void SetValue<T>(PlayerValues valueName, T value)
     {
         var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
         field.SetValue(this,value);
@@ -412,6 +396,7 @@ public class Player : MonoBehaviour, IModifieable
         float a = chargedStrenght / itemHolding.GetComponent<Rigidbody>().mass;
         float v = Mathf.Sqrt(2 * a * 0.5f);
         itemHolding.GetComponent<Rigidbody>().AddForce(v * Cam.transform.TransformDirection(Vector3.forward) + new Vector3(0,0.5f),ForceMode.VelocityChange);
+        itemHolding.GetComponent<Item>().PlayerHolding(null);
 
         itemHolding = null;
     }
@@ -434,6 +419,7 @@ public class Player : MonoBehaviour, IModifieable
             itemHolding.GetComponent<Rigidbody>().freezeRotation = false;
             itemHolding.GetComponent<Collider>().enabled = true;
             itemHolding.GetComponent<Rigidbody>().AddForce(moveDirection * (rb.linearVelocity.x + rb.linearVelocity.y), ForceMode.Impulse);
+            itemHolding.GetComponent<Item>().PlayerHolding(null);
 
             itemHolding = null;
             itemHolder.transform.DetachChildren();

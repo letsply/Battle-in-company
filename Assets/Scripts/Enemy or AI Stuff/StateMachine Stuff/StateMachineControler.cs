@@ -4,6 +4,24 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 
+public enum EnemyValues
+{
+    strength,
+    health,
+    criticalDamageMultiplier,
+    speed,
+    sprintingSpeed,
+    stamina,
+    staminaRegain,
+    infinitStamina,
+    jumpForce,
+    jumps,
+    airResistance,
+    attackRange,
+    attackingTarget,
+    viewAngle,
+}
+
 public abstract class StateMachineControler : MonoBehaviour, IModifieable
 {
     float damageTime = 0;
@@ -22,15 +40,6 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     #region Values
 
     // when adding a new Value put it in the enum
-
-    protected bool hitting = false;
-
-    protected float grabbingRange = 2;
-    [SerializeField] protected float bestWeight;
-    public float BestWeight() => bestWeight;
-    public GameObject ItemHolding() => itemHolding;
-
-    [SerializeField] protected float attackRange;
     [SerializeField] protected float strength;
     [SerializeField] protected float health;
     [SerializeField] protected float criticalDamageMultiplier;
@@ -58,56 +67,37 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     #endregion
 
     #region Get and set
-    public enum Values
+    public T GetValue<T>(EnemyValues valueName)
     {
-        strength,
-        health,
-        criticalDamageMultiplier,
-        speed,
-        sprintingSpeed,
-        stamina,
-        staminaRegain,
-        infinitStamina,
-        jumpForce,
-        jumps,
-        airResistance,
-        range,
-        attackingTarget,
-    }
-    protected string[] valueNames = new string[]
-    {
-        "strength",
-        "health",
-        "criticalDamageMultiplier",
-        "speed",
-        "sprintingSpeed",
-        "stamina",
-        "staminaRegain",
-        "infinitStamina",
-        "jumpForce",
-        "jumps",
-        "airResistance",
-        "attackRange",
-        "attackingTarget",
-    };
-
-    public T GetValue<T>(Values valueName)
-    {
-        string name = valueNames[(int)valueName];
+        string name = valueName.ToString();
         var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
         return (T)field.GetValue(this);
     }
 
-    public void SetValue<T>(Values valueName, T value)
+    public void SetValue<T>(EnemyValues valueName, T value)
     {
         var field = GetType().GetField(name, BindingFlags.NonPublic | BindingFlags.Instance);
         field.SetValue(this, value);
     }
+
     #endregion
 
     #endregion
 
     #region StateMachine
+
+    protected bool hitting = false;
+
+    protected float grabbingRange = 2;
+
+    [Header("StateMachineStuff")]
+    [SerializeField] protected float bestWeight;
+    [SerializeField] protected float attackRange;
+    [SerializeField] protected int viewAngle;
+
+    public float BestWeight() => bestWeight;
+    public GameObject ItemHolding() => itemHolding;
+
     protected Transform attackingTarget;
 
     protected GameObject itemHolding;
@@ -187,6 +177,7 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
 
     public virtual void Update()
     {
+
         if (currentState != null)
         {
             currentState.OnUpdate();
@@ -221,7 +212,7 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     {
         Collider[] hitColliders = Physics.OverlapBox(itemHolder.transform.position, new Vector3(grabbingRange, GetComponent<CapsuleCollider>().height, grabbingRange), Quaternion.identity, itemLayer);
 
-        if (hitColliders != null)
+        if (hitColliders.Length != 0)
         {
             // first collider in array gets used
             itemHolding = hitColliders[0].transform.gameObject;
@@ -237,6 +228,10 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
             {
                 item.EnemyHolding(this);
             }
+        }
+        else
+        {
+            SwitchState(States.Evade);
         }
     }
 
@@ -279,6 +274,8 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
     {
         itemHolderAnim.SetTrigger("Throwing");
 
+        agent.speed = 0;
+
         // Wait until the animation state is fully played (normalizedTime >= 1)
         yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
 
@@ -292,6 +289,9 @@ public abstract class StateMachineControler : MonoBehaviour, IModifieable
         float a = strength / itemHolding.GetComponent<Rigidbody>().mass;
         float v = Mathf.Sqrt(2 * a * 0.5f);
         itemHolding.GetComponent<Rigidbody>().AddForce(v * transform.TransformDirection(Vector3.forward) + new Vector3(0, 0.5f), ForceMode.VelocityChange);
+        itemHolding.GetComponent<Item>().EnemyHolding(null);
+
+        agent.speed = speed;
 
         itemHolding = null;
     }

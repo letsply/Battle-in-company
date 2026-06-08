@@ -9,7 +9,7 @@ public class Evade : BaseState
     Vector3 fleeingPos = new Vector3();
     protected override void StartOverride()
     {
-        playerPos = SMC.GetValue<Transform>(StateMachineControler.Values.attackingTarget);
+        playerPos = SMC.GetValue<Transform>(EnemyValues.attackingTarget);
 
         #region PlayerZoneX
 
@@ -20,7 +20,9 @@ public class Evade : BaseState
         float nPlayerZoneXMin = 0;
         float nPlayerZoneXMax = 0;
 
-        for (int i = 10; i >= 0; i--)
+        int i = (SMC.ItemHolding() == null) ? i = 15 : i = 30;
+
+        for (; i >= 0; i--)
         {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(playerPos.position, out hit, playerPos.position.x + i, NavMesh.AllAreas))
@@ -31,7 +33,9 @@ public class Evade : BaseState
             }
         }
 
-        for (int i = -10; i <= 0; i++)
+        i = (SMC.ItemHolding() == null) ? i = -15 : i = -30;
+
+        for (; i <= 0; i++)
         {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(playerPos.position, out hit, playerPos.position.x + i, NavMesh.AllAreas))
@@ -66,7 +70,9 @@ public class Evade : BaseState
         float nPlayerZoneZMin = 0;
         float nPlayerZoneZMax = 0;
 
-        for (int i = 10; i >= 0; i--)
+        i = (SMC.ItemHolding() == null) ? i = 15 : i = 30;
+
+        for (; i >= 0; i--)
         {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(playerPos.position, out hit, playerPos.position.z + i, NavMesh.AllAreas))
@@ -78,7 +84,9 @@ public class Evade : BaseState
             }
         }
 
-        for (int i = -10; i <= 0; i++)
+        i = (SMC.ItemHolding() == null) ? i = -15 : i = -30;
+
+        for (; i <= 0; i++)
         {
             NavMeshHit hit;
             if (NavMesh.SamplePosition(playerPos.position, out hit, playerPos.position.z + i, NavMesh.AllAreas))

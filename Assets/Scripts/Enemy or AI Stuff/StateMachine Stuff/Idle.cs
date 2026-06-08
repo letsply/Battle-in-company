@@ -8,16 +8,19 @@ public class Idle : BaseState
         {
             if (SMC.ItemHolding() == null)
             {
+                Debug.Log("Searching for Item ...");
                 SMC.SwitchState(StateMachineControler.States.SearchForItem);
             }
             else
             {
-                if (SMC.GetValue<Transform>(StateMachineControler.Values.attackingTarget) == null)
+                if (SMC.GetValue<Transform>(EnemyValues.attackingTarget) == null)
                 {
+                    Debug.Log("Searching for Player ...");
                     SMC.SwitchState(StateMachineControler.States.SearchPlayer);
                 }
                 else
                 {
+                    Debug.Log("Attacking ... ");
                     SMC.SwitchState(StateMachineControler.States.Attack);
                 }
             }
