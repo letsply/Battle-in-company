@@ -9,8 +9,8 @@ public class Item : MonoBehaviour, IModifieable
     private Player playerHolding;
     public void PlayerHolding(Player player) { playerHolding = player; }
 
-    private StateMachineControler enemyHolding;
-    public void EnemyHolding(StateMachineControler enemy) { enemyHolding = enemy; }
+    private EnemyBase2 enemyHolding;
+    public void EnemyHolding(EnemyBase2 enemy) { enemyHolding = enemy; }
     public bool ItemIsHeld() 
     {
         if(playerHolding == null && enemyHolding == null)
@@ -152,7 +152,7 @@ public class Item : MonoBehaviour, IModifieable
         else if (itemCanHurt && collision.transform.tag == "Enemy")
         {
             // ask if item is not hitting self
-            if (collision.gameObject.GetComponent<StateMachineControler>() != enemyHolding)
+            if (collision.gameObject.GetComponent<EnemyBase2>() != enemyHolding)
             {
                 // calc damage and the crit chance
                 float damage = 0;
@@ -190,7 +190,7 @@ public class Item : MonoBehaviour, IModifieable
                 // let the Enemy take dmg and divide it by 10 to hold the numbers small
                 damage /= 10;
 
-                collision.transform.GetComponent<StateMachineControler>().TakeDmg(damage);
+                collision.transform.GetComponent<EnemyBase2>().TakeDmg(damage);
             }
         }
 
@@ -256,13 +256,13 @@ public class Item : MonoBehaviour, IModifieable
             // let the Enemy take dmg and divide it by 10 to hold the numbers small
             damage /= 10;
 
-            collision.transform.GetComponent<StateMachineControler>().TakeDmg(damage);
+            collision.transform.GetComponent<EnemyBase2>().TakeDmg(damage);
 
 
             // in the end apply effect to Enemy
             foreach (var mod in itemModifiers)
             {
-                mod.GiveEffect(null, collision.transform.GetComponent<StateMachineControler>());
+                mod.GiveEffect(null, collision.transform.GetComponent<EnemyBase2>());
             }
         }
     }

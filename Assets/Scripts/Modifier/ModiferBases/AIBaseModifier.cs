@@ -3,8 +3,8 @@ using static UnityEditor.Progress;
 
 public class AIBaseModifier : BaseModifier
 {
-    protected StateMachineControler enemy;
-    public void FindEnemy(StateMachineControler enemyToMod)
+    protected EnemyBase2 enemy;
+    public void FindEnemy(EnemyBase2 enemyToMod)
     {
         enemy = enemyToMod;
     }

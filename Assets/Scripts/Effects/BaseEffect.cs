@@ -4,14 +4,14 @@ using UnityEngine;
 public abstract class BaseEffect
 {
     Player player;
-    StateMachineControler enemy;
+    EnemyBase2 enemy;
 
     public void FindPlayer(Player playerToEffect)
     {
         player = playerToEffect;
     }
 
-    public void FindEnemy(StateMachineControler enemyToEffect)
+    public void FindEnemy(EnemyBase2 enemyToEffect)
     {
         enemy = enemyToEffect;
     }
