@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyView : MonoBehaviour
+public class EnemyView 
 {
     private List<GameObject> targetsInView = new List<GameObject>();
     private List<Ray> view = new List<Ray>();
@@ -9,7 +9,7 @@ public class EnemyView : MonoBehaviour
 
     // Values from Base
     private EnemyBase2 enemyBase2;
-    private int viewAngle;
+    private float viewAngle;
     private float attackRange;
 
     // Values To base
@@ -18,49 +18,56 @@ public class EnemyView : MonoBehaviour
 
     public void GetEnemyBase(EnemyBase2 enemyBase)
     {
-        viewAngle = enemyBase.GetValue<int>(EnemyValues.viewAngle);
+        viewAngle = enemyBase.GetValue<float>(EnemyValues.viewAngle);
         attackRange = enemyBase.GetValue<float>(EnemyValues.attackRange);
 
         enemyBase2 = enemyBase;
     }
 
-    void Update()
+    public void OnUpdate()
     {
-        // make Rays
-        view.Clear();
-        for (int i = -1 * viewAngle; viewAngle > i; i++)
+        if (enemyBase2 != null)
         {
-            Vector3 vector = enemyBase2.transform.TransformDirection(Vector3.forward);
-            Vector3 dir = Quaternion.AngleAxis(i, enemyBase2.transform.up) * vector;
-
-            //Debug.DrawRay(SMC.transform.position, dir * SMC.GetValue<float>(EnemyValues.attackRange), Color.yellow);
-            Ray ray = new Ray(enemyBase2.transform.position, dir);
-            view.Add(ray);
-        }
-
-        // gets Targets In View
-        RaycastHit hit;
-        targetsInView.Clear();
-        foreach (Ray ray in view)
-        {
-            if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.tag == "Player")
+            // make Rays
+            view.Clear();
+            for (float i = -1f * viewAngle; viewAngle > i; i++)
             {
-                targetsInView.Add(hit.collider.gameObject);
-            }
-        }
-        // Gets targets in a range and adds them to the View list
-        Collider[] hitColliders = Physics.OverlapBox(enemyBase2.transform.position, new Vector3(5, 2, 5), Quaternion.identity);
-        foreach (Collider collider in hitColliders)
-        {
-            if (collider.gameObject.tag == "Player")
-            {
-                targetsInView.Add(collider.gameObject);
-            }
-        }
+                Vector3 vector = enemyBase2.transform.TransformDirection(Vector3.forward);
+                Vector3 dir = Quaternion.AngleAxis(i, enemyBase2.transform.up) * vector;
 
-        if (enemyBase2.IsStateCurrent(EnemyBase2.States.Attack))
-        {
-            IsInAttackRange();
+                //Debug.DrawRay(enemyBase2.transform.position, dir * enemyBase2.GetValue<float>(EnemyValues.attackRange), Color.yellow);
+                Ray ray = new Ray(enemyBase2.transform.position, dir);
+                view.Add(ray);
+            }
+
+            // gets Targets In View
+            RaycastHit hit;
+            targetsInView.Clear();
+            foreach (Ray ray in view)
+            {
+                if (Physics.Raycast(ray, out hit) && hit.collider.gameObject.tag == "Player")
+                {
+                    targetsInView.Add(hit.collider.gameObject);
+                }
+            }
+            // Gets targets in a range and adds them to the View list
+            Vector3 size = new Vector3(5, 2, 5);
+            Collider[] hitColliders = Physics.OverlapBox(enemyBase2.transform.position, size, Quaternion.identity);
+            if (hitColliders.Length > 0)
+            {
+                foreach (Collider collider in hitColliders)
+                {
+                    if (collider.gameObject.tag == "Player")
+                    {
+                        targetsInView.Add(collider.gameObject);
+                    }
+                }
+            }
+
+            if (enemyBase2.IsStateCurrent(EnemyBase2.States.Attack))
+            {
+                IsInAttackRange();
+            }
         }
     }
 

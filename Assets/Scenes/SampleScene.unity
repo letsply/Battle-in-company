@@ -3327,33 +3327,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d6bdef811274f4188efda37a2d02e7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Dummy
-  damageTime: 0
-  itemHolder: {fileID: 915376753}
-  itemHolderAnim: {fileID: 915376754}
+  itemHolder: {fileID: 0}
+  itemHeld: {fileID: 0}
   itemLayer:
-    m_Bits: 64
+    m_Bits: 0
+  viewAngle: 45
+  viewRange: 45
+  perfectWeight: 10
+  attackRange: 8
   strength: 1000
   health: 100
   criticalDamageMultiplier: 2
   speed: 3.5
-  sprintingSpeed: 0
-  maxStamina: 0
-  staminaRegain: 0
-  infinitStamina: 0
-  stamina: 0
+  sprintingSpeed: 5
   jumpForce: 0
   jumps: 0
-  airResistance: 1
-  maxJumps: 0
-  hitting: 0
-  grabbingRange: 2
-  bestWeight: 10
-  attackRange: 5
-  viewAngle: 45
-  attackingTarget: {fileID: 0}
-  itemHolding: {fileID: 0}
+  airResistance: 0
   attackType: 0
-  stratagieType: 2
+  stratagieType: 0
 --- !u!136 &1489658985
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -4105,25 +4096,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57420eb6830c33b44889688938dca695, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBase2
-  itemHolder: {fileID: 0}
+  itemHolder: {fileID: 1589438895}
   itemHeld: {fileID: 0}
   itemLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   viewAngle: 45
   viewRange: 45
   perfectWeight: 10
-  attackRange: 8
-  strenght: 1000
+  attackRange: 1
+  strength: 1000
   health: 100
   criticalDamageMultiplier: 2
   speed: 3.5
   sprintingSpeed: 5
   jumpForce: 0
   jumps: 0
-  airResistance: 0
-  attackType: 0
-  stratagieType: 0
+  airResistance: 2
+  attackType: 1
+  stratagieType: 2
 --- !u!1 &1748082179
 GameObject:
   m_ObjectHideFlags: 0

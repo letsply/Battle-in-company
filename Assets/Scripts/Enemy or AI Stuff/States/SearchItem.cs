@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Serialization;
 using UnityEngine;
 
 public class SearchItem : BaseState
@@ -6,7 +7,7 @@ public class SearchItem : BaseState
     private List<Item> items = new List<Item>();
 
     private float diseredWeight { get => enemyBase2.GetValue<float>(EnemyValues.perfectWeight); }
-    private static int nearestWeight(float diseredWeight, Item x, Item y)
+    private static int sortByWeight(float diseredWeight, Item x, Item y)
     {
         if (x == null)
         {
@@ -30,6 +31,30 @@ public class SearchItem : BaseState
             }
         }
     }
+    private static int sortByDistance(Vector3 enemyBase2Pos, Item x, Item y)
+    {
+        if (x == null)
+        {
+
+            if (y == null)
+            { return 0; }
+            else
+            { return -1; }
+        }
+
+        else
+        {
+
+            if (y == null)
+            { return 1; }
+            else
+            {
+                float dist1 = Vector3.Distance(enemyBase2Pos,x.transform.position);
+                float dist2 = Vector3.Distance(enemyBase2Pos, y.transform.position);
+                return dist1.CompareTo(dist2);
+            }
+        }
+    }
 
     protected override void StartOverride()
     {
@@ -46,21 +71,29 @@ public class SearchItem : BaseState
                 items.Add(item);
             }
         }
-        if (items.Count == 0)
+        if(items.Count != 0)
         {
-            
-        }
-        else
-        {
-            items.Sort((x, y) => nearestWeight(diseredWeight, x, y));
+            items.Sort((x, y) => sortByWeight(diseredWeight, x, y));
+            items.Sort((x, y) => sortByDistance(enemyBase2.transform.position, x, y));
             enemyBase2.SetDestination(items[0].gameObject, false);
         }
     }
 
     protected override void UpdateOverride()
     {
+        // Evade Player
+        if (enemyBase2.TargetsInView().Count > 0)
+        {
+            Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
+            enemyBase2.Agent.velocity = Vector3.Lerp(
+                enemyBase2.Agent.desiredVelocity,
+                -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
+                // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
+                Mathf.Clamp01(2.5f - directionToTarget.magnitude / 5)
+            );
+        }
 
-        if (enemyBase2.ItemHeld() == null)
+        if (enemyBase2.HasItem() == false)
         {
             if (items[0].ItemIsHeld())
             {

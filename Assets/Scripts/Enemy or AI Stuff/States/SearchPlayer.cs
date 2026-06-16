@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class SearchPlayer : BaseState
 {
-    protected override void StartOverride()
+    protected override void UpdateOverride()
     {
         WalkAround();
     }
@@ -10,7 +10,7 @@ public class SearchPlayer : BaseState
     public void WalkAround()
     {
         // Generate a random destination to walk to in the range of 10
-        if (enemyBase2.Agent.velocity.magnitude <= 0.0125f)
+        if (enemyBase2.Agent.velocity.magnitude <= 0.025f)
         {
             Vector3 destination = new Vector3
             (
@@ -26,10 +26,6 @@ public class SearchPlayer : BaseState
             enemyBase2.SetDestination(enemyBase2.TargetsInView()[0],true);
             enemyBase2.SwitchState(EnemyBase2.States.Attack);
         }
-
-        if (GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length == 0)
-        {
-            WalkAround();
-        }
+        
     }
 }

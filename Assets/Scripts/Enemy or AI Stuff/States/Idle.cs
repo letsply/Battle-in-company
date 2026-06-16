@@ -7,8 +7,9 @@ public class Idle : BaseState
     protected override void StartOverride()
     {
         if (enemyBase2.HasItem())
-        { 
-            enemyBase2.SwitchState(EnemyBase2.States.SearchForItem); 
+        {
+            Debug.Log("SearchPlayer ...");
+            enemyBase2.SwitchState(EnemyBase2.States.SearchPlayer); 
         }
         else if(GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length > 0)
         {
@@ -35,10 +36,10 @@ public class Idle : BaseState
             enemyBase2.Agent.destination = destination;
         }
 
-
-        Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
+        // Player Evasion
         if (enemyBase2.TargetsInView().Count > 0)
         {
+            Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
             enemyBase2.Agent.velocity = Vector3.Lerp(
                 enemyBase2.Agent.desiredVelocity,
                 -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),

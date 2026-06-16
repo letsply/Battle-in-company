@@ -33,7 +33,7 @@ public class EnemyBase2 : MonoBehaviour
     protected Rigidbody rb => gameObject.GetComponent<Rigidbody>();
 
     [SerializeField] protected GameObject itemHolder;
-    protected Animator itemHolderAnim => itemHolder.GetComponent<Animator>();
+    public Animator ItemHolderAnim { get => itemHolder.GetComponent<Animator>(); }
 
     [SerializeField] protected GameObject itemHeld;
     [SerializeField] protected LayerMask itemLayer;
@@ -53,7 +53,7 @@ public class EnemyBase2 : MonoBehaviour
     [SerializeField] protected float perfectWeight = 10;
     [SerializeField] protected float attackRange = 8;
 
-    [SerializeField] protected float strenght = 1000;
+    [SerializeField] protected float strength = 1000;
     [SerializeField] protected float health = 100;
     [SerializeField] protected float criticalDamageMultiplier = 2;
 
@@ -85,9 +85,10 @@ public class EnemyBase2 : MonoBehaviour
     #region StateMachine
 
     // view Stuff
-    public EnemyView view { get => new EnemyView(); }
-    public List<GameObject> TargetsInView() => view.TargetsInView();
-    public bool TargetIsAttackable() => view.TargetIsAttackable();
+    protected EnemyView view;
+    public EnemyView View { get => view; }
+    public List<GameObject> TargetsInView() => View.TargetsInView();
+    public bool TargetIsAttackable() => View.TargetIsAttackable();
 
     public bool HasItem()
     {
@@ -166,7 +167,8 @@ public class EnemyBase2 : MonoBehaviour
         ApplyModifiers();
 
         //Give Itself to View
-        view.GetEnemyBase(this);
+        view = new EnemyView();
+        View.GetEnemyBase(this);
 
         // Initialize States
         Idle idle = new Idle();
@@ -188,6 +190,7 @@ public class EnemyBase2 : MonoBehaviour
         if (currentState != null)
         {
             currentState.OnUpdate();
+            View.OnUpdate();
         }
 
         if (lastDamageTime > 0)
@@ -247,7 +250,7 @@ public class EnemyBase2 : MonoBehaviour
 
     public IEnumerator HitAnimate(Item item)
     {
-        itemHolderAnim.SetTrigger("Punching");
+        ItemHolderAnim.SetTrigger("Punching");
 
         hitting = true;
         item.IsPunching(true);
@@ -255,7 +258,7 @@ public class EnemyBase2 : MonoBehaviour
         itemHeld.GetComponent<Collider>().enabled = true;
         itemHeld.GetComponent<Collider>().isTrigger = true;
         // Wait until the animation state is fully played (normalizedTime >= 1)
-        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+        yield return new WaitForSeconds(ItemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
 
         // Animation has finished
         itemHeld.GetComponent<Collider>().enabled = false;
@@ -274,10 +277,10 @@ public class EnemyBase2 : MonoBehaviour
 
     public IEnumerator ThrowAnimate(Item item)
     {
-        itemHolderAnim.SetTrigger("Throwing");
+        ItemHolderAnim.SetTrigger("Throwing");
 
         // Wait until the animation state is fully played (normalizedTime >= 1)
-        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+        yield return new WaitForSeconds(ItemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
 
         // Animation has finished
         itemHeld.GetComponent<Rigidbody>().useGravity = true;
@@ -286,7 +289,7 @@ public class EnemyBase2 : MonoBehaviour
 
         itemHolder.transform.DetachChildren();
 
-        float a = strenght / itemHeld.GetComponent<Rigidbody>().mass;
+        float a = strength / itemHeld.GetComponent<Rigidbody>().mass;
         float v = Mathf.Sqrt(2 * a * 0.5f);
         itemHeld.GetComponent<Rigidbody>().AddForce(v * transform.TransformDirection(Vector3.forward) + new Vector3(0, 0.5f), ForceMode.VelocityChange);
         itemHeld.GetComponent<Item>().EnemyHolding(null);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -30,9 +31,10 @@ public abstract class BaseState
         enemyBase2.SwitchState(state);
     }
 
-    public IEnumerator Wait(float time,Coroutine corutine)
+    public virtual IEnumerator Wait(float time, Coroutine coroutine)
     {
         yield return new WaitForSeconds(time);
+        coroutine = null;
     }
 
 }
