@@ -2,6 +2,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using System.Collections;
 
 public enum EnemyValues
 {
@@ -19,7 +20,8 @@ public enum EnemyValues
     targetEnemy,
     viewAngle,
     viewRange,
-    itemHolderAnim
+    itemHolderAnim,
+    perfectWeight
 }
 
 
@@ -31,14 +33,11 @@ public class EnemyBase2 : MonoBehaviour
     protected Rigidbody rb => gameObject.GetComponent<Rigidbody>();
 
     [SerializeField] protected GameObject itemHolder;
-    protected Animator itemHolderAnim => itemHolder.GetComponent<Animator>(); 
+    protected Animator itemHolderAnim => itemHolder.GetComponent<Animator>();
 
     [SerializeField] protected GameObject itemHeld;
     [SerializeField] protected LayerMask itemLayer;
-
-    protected NavMeshAgent agent => GetComponent<NavMeshAgent>();
-    protected GameObject targetEnemy;
-    protected Vector3 targetPos;
+    public GameObject ItemHeld() => itemHeld;
 
     #endregion
 
@@ -85,8 +84,28 @@ public class EnemyBase2 : MonoBehaviour
 
     #region StateMachine
 
+    // view Stuff
+    public EnemyView view { get => new EnemyView(); }
+    public List<GameObject> TargetsInView() => view.TargetsInView();
+    public bool TargetIsAttackable() => view.TargetIsAttackable();
+
+    public bool HasItem()
+    {
+        if (itemHeld != null) { return true; } else { return false; }
+    }
+
+    public NavMeshAgent Agent { get => GetComponent<NavMeshAgent>(); }
+
+    protected GameObject targetEnemy;
+    public GameObject TargetEnemy() => targetEnemy;
+    protected Vector3 targetPos;
+
+    // State Stuff
     protected BaseState currentState;
+    public BaseState CurrentState() => currentState;
     protected List<BaseState> states = new List<BaseState>();
+
+    #region To Many Enums(states & Behavior)
 
     public enum States
     {
@@ -94,9 +113,9 @@ public class EnemyBase2 : MonoBehaviour
         SearchForItem,
         SearchPlayer,
         Attack,
-        Evade
     }
 
+    [Header("Behavior")]
     [SerializeField] protected AttackType attackType;
     public enum AttackType
     {
@@ -113,6 +132,7 @@ public class EnemyBase2 : MonoBehaviour
         Strategic
     }
     public StratagieType GetStratagie() => stratagieType;
+    #endregion
 
     #endregion
 
@@ -145,17 +165,19 @@ public class EnemyBase2 : MonoBehaviour
 
         ApplyModifiers();
 
-        //Idle idle = new Idle();
-        //SearchForItem item = new SearchForItem();
-        //SearchPlayer player = new SearchPlayer();
-        //Attack attack = new Attack();
-        //Evade evade = new Evade();
+        //Give Itself to View
+        view.GetEnemyBase(this);
 
-        //baseStates.Add(idle);
-        //baseStates.Add(item);
-        //baseStates.Add(player);
-        //baseStates.Add(attack);
-        //baseStates.Add(evade);
+        // Initialize States
+        Idle idle = new Idle();
+        SearchItem item = new SearchItem();
+        SearchPlayer player = new SearchPlayer();
+        Attack attack = new Attack();
+
+        states.Add(idle);
+        states.Add(item);
+        states.Add(player);
+        states.Add(attack);
 
         SwitchState(States.Idle);
     }
@@ -191,19 +213,114 @@ public class EnemyBase2 : MonoBehaviour
         }
     }
 
+    #region actions
+    public void Take()
+    {
+        Collider[] hitColliders = Physics.OverlapBox(itemHolder.transform.position, new Vector3(grabbingRange, GetComponent<CapsuleCollider>().height, grabbingRange), Quaternion.identity, itemLayer);
+
+        if (hitColliders.Length != 0)
+        {
+            // first collider in array gets used
+            itemHeld = hitColliders[0].transform.gameObject;
+            itemHeld.transform.parent = itemHolder.transform;
+            itemHeld.transform.position = itemHolder.transform.position;
+            itemHeld.transform.rotation = itemHolder.transform.rotation;
+
+            itemHeld.GetComponent<Rigidbody>().useGravity = false;
+            itemHeld.GetComponent<Rigidbody>().freezeRotation = true;
+            itemHeld.GetComponent<Collider>().enabled = false;
+                
+            if (itemHeld.TryGetComponent<Item>(out Item item))
+            {
+                item.EnemyHolding(this);
+            }
+        }
+    }
+
+    public void Hit()
+    {
+        if (itemHeld.TryGetComponent<Item>(out Item item) && hitting == false)
+        {
+            StartCoroutine(HitAnimate(item));
+        }
+    }
+
+    public IEnumerator HitAnimate(Item item)
+    {
+        itemHolderAnim.SetTrigger("Punching");
+
+        hitting = true;
+        item.IsPunching(true);
+
+        itemHeld.GetComponent<Collider>().enabled = true;
+        itemHeld.GetComponent<Collider>().isTrigger = true;
+        // Wait until the animation state is fully played (normalizedTime >= 1)
+        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Animation has finished
+        itemHeld.GetComponent<Collider>().enabled = false;
+        itemHeld.GetComponent<Collider>().isTrigger = false;
+        item.IsPunching(false);
+        hitting = false;
+    }
+
+    public void Throw()
+    {
+        if (itemHeld.TryGetComponent<Item>(out Item item) && hitting == false)
+        {
+            StartCoroutine(ThrowAnimate(item));
+        }
+    }
+
+    public IEnumerator ThrowAnimate(Item item)
+    {
+        itemHolderAnim.SetTrigger("Throwing");
+
+        // Wait until the animation state is fully played (normalizedTime >= 1)
+        yield return new WaitForSeconds(itemHolderAnim.GetCurrentAnimatorStateInfo(0).length);
+
+        // Animation has finished
+        itemHeld.GetComponent<Rigidbody>().useGravity = true;
+        itemHeld.GetComponent<Rigidbody>().freezeRotation = false;
+        itemHeld.GetComponent<Collider>().enabled = true;
+
+        itemHolder.transform.DetachChildren();
+
+        float a = strenght / itemHeld.GetComponent<Rigidbody>().mass;
+        float v = Mathf.Sqrt(2 * a * 0.5f);
+        itemHeld.GetComponent<Rigidbody>().AddForce(v * transform.TransformDirection(Vector3.forward) + new Vector3(0, 0.5f), ForceMode.VelocityChange);
+        itemHeld.GetComponent<Item>().EnemyHolding(null);
+
+        itemHeld = null;
+    }
+
+    public void Use()
+    {
+
+    }
+
+    #endregion
+
     public void SetDestination(GameObject newDestination, bool isAttackingTarget)
     {
         if (isAttackingTarget)
         {
             targetEnemy = newDestination;
         }
-        agent.destination = newDestination.transform.position;
+        Agent.destination = newDestination.transform.position;
     }
 
     public void SwitchState(States state)
     {
         currentState = states[(int)state];
         currentState.StartState(this);
+    }
+    public bool IsStateCurrent(States state)
+    {
+        if (currentState == states[(int)state])
+        { return true; }
+        else 
+        { return false; }
     }
 
     public void TakeDmg(float dmg)

@@ -3939,6 +3939,7 @@ GameObject:
   - component: {fileID: 1740159407}
   - component: {fileID: 1740159406}
   - component: {fileID: 1740159405}
+  - component: {fileID: 1740159410}
   - component: {fileID: 1740159404}
   m_Layer: 0
   m_Name: Dummy (1)
@@ -3946,7 +3947,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!195 &1740159404
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -4092,6 +4093,37 @@ Transform:
   - {fileID: 1589438896}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1740159410
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1740159403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57420eb6830c33b44889688938dca695, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBase2
+  itemHolder: {fileID: 0}
+  itemHeld: {fileID: 0}
+  itemLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  viewAngle: 45
+  viewRange: 45
+  perfectWeight: 10
+  attackRange: 8
+  strenght: 1000
+  health: 100
+  criticalDamageMultiplier: 2
+  speed: 3.5
+  sprintingSpeed: 5
+  jumpForce: 0
+  jumps: 0
+  airResistance: 0
+  attackType: 0
+  stratagieType: 0
 --- !u!1 &1748082179
 GameObject:
   m_ObjectHideFlags: 0

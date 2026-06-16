@@ -25,12 +25,12 @@ public abstract class BaseState
 
     }
 
-    protected virtual void EndState()
+    protected virtual void EndState(EnemyBase2.States state)
     {
-        enemyBase2.SwitchState(EnemyBase2.States.Idle);
+        enemyBase2.SwitchState(state);
     }
 
-    public IEnumerator Wait(float time)
+    public IEnumerator Wait(float time,Coroutine corutine)
     {
         yield return new WaitForSeconds(time);
     }
