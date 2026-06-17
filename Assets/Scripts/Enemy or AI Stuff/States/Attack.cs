@@ -6,7 +6,6 @@ public class Attack : BaseState
 {
     private EnemyBase2.AttackType attackType;
     private EnemyBase2.StratagieType stratagie;
-    private Coroutine wait;
     private bool isFleeing;
 
     protected override void StartOverride()
@@ -14,7 +13,6 @@ public class Attack : BaseState
         attackType = enemyBase2.GetAttackType();
         stratagie = enemyBase2.GetStratagie();
 
-        wait = null;
         isFleeing = false;
     }
 
@@ -42,7 +40,7 @@ public class Attack : BaseState
             {
                 enemyBase2.Agent.destination = enemyBase2.GetValue<GameObject>(EnemyValues.targetEnemy).transform.position;
             }
-            else if (isFleeing)
+            if (isFleeing)
             {
                 Flee();
             }
@@ -58,10 +56,8 @@ public class Attack : BaseState
             Quaternion targetRotation = Quaternion.LookRotation(direction);
             enemyBase2.transform.rotation = Quaternion.RotateTowards(enemyBase2.transform.rotation, targetRotation, enemyBase2.Agent.angularSpeed * Time.deltaTime);
 
-            if (enemyBase2.TargetIsAttackable())
+            if (enemyBase2.TargetIsAttackable() && isFleeing == false)
             {
-                enemyBase2.Agent.isStopped = true;
-
                 RaycastHit Throwhit;
                 Ray ThrowRay = new Ray(enemyBase2.transform.position, enemyBase2.transform.TransformDirection(Vector3.forward));
 
@@ -69,20 +65,17 @@ public class Attack : BaseState
                 {
                     if (Throwhit.collider.tag == "Player")
                     {
-                        if (wait == null)
+                        enemyBase2.Agent.isStopped = true;
+                        if (waiting == false && enemyBase2.HasItem() == true)
                         {
                             enemyBase2.Throw();
-                            wait = enemyBase2.StartCoroutine(Wait(enemyBase2.ItemHolderAnim.GetCurrentAnimatorStateInfo(0).length, wait));
+                            enemyBase2.StartCoroutine(Wait(enemyBase2.ItemHolderAnim.GetCurrentAnimatorStateInfo(0).length + 0.15f));
                         }
-                    }
-                    else if (isFleeing == false)
-                    {
-                        enemyBase2.Agent.destination = enemyBase2.GetValue<GameObject>(EnemyValues.targetEnemy).transform.position;
                     }
                 }
 
             }
-            if (enemyBase2.HasItem() == false)
+            if (enemyBase2.HasItem() == false && waiting == false || isFleeing == true)
             {
                 Flee();
             }
@@ -95,11 +88,8 @@ public class Attack : BaseState
         isFleeing = true;
         enemyBase2.Agent.isStopped = false;
 
-        if (enemyBase2.TargetIsAttackable())
-        {
-            WalkAround();
-        }
-        if (enemyBase2.Agent.remainingDistance < 0.5f)
+        WalkAround();
+        if (enemyBase2.Agent.velocity.magnitude < 0.25f)
         {
             EndState(EnemyBase2.States.Idle);
         }
@@ -108,13 +98,17 @@ public class Attack : BaseState
     public void WalkAround()
     {
         // Generate a random destination to walk to in the range of 10
-        Vector3 destination = new Vector3
-        (
+        
+        if (enemyBase2.Agent.velocity.magnitude < 0.25f)
+        {
+            Vector3 destination = new Vector3
+            (
             enemyBase2.transform.position.x + Random.Range(-10, 10),
             enemyBase2.transform.position.y,
             enemyBase2.transform.position.z + Random.Range(-10, 10)
-        );
-        enemyBase2.Agent.destination = destination;
+            );
+            enemyBase2.Agent.destination = destination;
+        }
 
         // Player Evasion
         if (enemyBase2.TargetsInView().Count > 0)
@@ -124,7 +118,7 @@ public class Attack : BaseState
                 enemyBase2.Agent.desiredVelocity,
                 -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
                 // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
-                Mathf.Clamp01(5 - directionToTarget.magnitude / 5)
+                Mathf.Clamp01(2 - directionToTarget.magnitude / 2)
             );
         }
     }

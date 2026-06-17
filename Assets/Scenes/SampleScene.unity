@@ -3330,6 +3330,7 @@ MonoBehaviour:
   itemHolder: {fileID: 0}
   itemHeld: {fileID: 0}
   itemLayer:
+    serializedVersion: 2
     m_Bits: 0
   viewAngle: 45
   viewRange: 45
@@ -4113,7 +4114,7 @@ MonoBehaviour:
   jumpForce: 0
   jumps: 0
   airResistance: 2
-  attackType: 1
+  attackType: 0
   stratagieType: 2
 --- !u!1 &1748082179
 GameObject:

@@ -5,6 +5,7 @@ using UnityEngine;
 public abstract class BaseState
 {
     protected EnemyBase2 enemyBase2;
+    protected bool waiting;
 
     public void StartState(EnemyBase2 stateMachineControler)
     {
@@ -31,10 +32,11 @@ public abstract class BaseState
         enemyBase2.SwitchState(state);
     }
 
-    public virtual IEnumerator Wait(float time, Coroutine coroutine)
+    public virtual IEnumerator Wait(float time)
     {
+        waiting = true;
         yield return new WaitForSeconds(time);
-        coroutine = null;
+        waiting = false;
     }
 
 }
