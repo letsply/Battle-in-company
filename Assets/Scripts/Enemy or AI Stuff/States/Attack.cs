@@ -31,7 +31,7 @@ public class Attack : BaseState
             // View at Player
             Vector3 direction = enemyBase2.GetValue<GameObject>(EnemyValues.targetEnemy).transform.position - enemyBase2.transform.position;
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            if (enemyBase2.TargetIsAttackable())
+            if (enemyBase2.TargetIsAttackable() )
             {
                  enemyBase2.Hit();
                  Flee();
@@ -75,7 +75,7 @@ public class Attack : BaseState
                 }
 
             }
-            if (enemyBase2.HasItem() == false && waiting == false || isFleeing == true)
+            if (enemyBase2.HasItem() == false || isFleeing)
             {
                 Flee();
             }
@@ -85,12 +85,19 @@ public class Attack : BaseState
 
     public void Flee()
     {
-        isFleeing = true;
-        enemyBase2.Agent.isStopped = false;
-
-        WalkAround();
-        if (enemyBase2.Agent.velocity.magnitude < 0.25f)
+        // First Time Flee Gets Called
+        if(isFleeing == false)
         {
+            enemyBase2.StartCoroutine(Wait(3));
+            isFleeing = true;
+            enemyBase2.Agent.isStopped = false;
+        }
+            
+        WalkAround();
+
+        if (enemyBase2.Agent.remainingDistance < enemyBase2.Agent.stoppingDistance)
+        {
+            isFleeing = false;
             EndState(EnemyBase2.States.Idle);
         }
     }
@@ -98,8 +105,8 @@ public class Attack : BaseState
     public void WalkAround()
     {
         // Generate a random destination to walk to in the range of 10
-        
-        if (enemyBase2.Agent.velocity.magnitude < 0.25f)
+
+        if (enemyBase2.Agent.remainingDistance < enemyBase2.Agent.stoppingDistance)
         {
             Vector3 destination = new Vector3
             (
@@ -110,24 +117,25 @@ public class Attack : BaseState
             enemyBase2.Agent.destination = destination;
         }
 
+
+        float playerDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.TargetEnemy().transform.position);
+        float enemyDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.transform.position);
+
         // Player Evasion
-        if (enemyBase2.TargetsInView().Count > 0)
+        if (playerDistanceToPoint > enemyDistanceToPoint && waiting == true)
         {
-            Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
-            enemyBase2.Agent.velocity = Vector3.Lerp(
-                enemyBase2.Agent.desiredVelocity,
-                -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
-                // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
-                Mathf.Clamp01(2 - directionToTarget.magnitude / 2)
-            );
+            if (enemyBase2.TargetsInView().Count > 0)
+            {
+                Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
+                enemyBase2.Agent.velocity = Vector3.Lerp(
+                    enemyBase2.Agent.desiredVelocity,
+                    -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
+                    // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
+                    Mathf.Clamp01(2 - directionToTarget.magnitude / 4)
+                );
+            }
         }
-    }
-
-
-    protected override void EndState(EnemyBase2.States state)
-    {
-        enemyBase2.Agent.isStopped = false;
-        enemyBase2.SwitchState(state);
+        
     }
 
 

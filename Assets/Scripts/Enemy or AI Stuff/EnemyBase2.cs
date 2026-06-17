@@ -332,6 +332,12 @@ public class EnemyBase2 : MonoBehaviour
         {
             health -= dmg;
             lastDamageTime = 0.5f;
+            //Die
+            if (health <= 0)
+            {
+                Destroy(gameObject);
+            }
         }
     }
+
 }

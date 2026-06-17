@@ -13,11 +13,13 @@ public class Idle : BaseState
         }
         else if(GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length > 0)
         {
+            Debug.Log("SearchItem ...");
             enemyBase2.SwitchState(EnemyBase2.States.SearchForItem); 
         }
 
         if (GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length == 0)
         {
+            Debug.Log("NoItemsThere ...");
             WalkAround();
         }
     }
