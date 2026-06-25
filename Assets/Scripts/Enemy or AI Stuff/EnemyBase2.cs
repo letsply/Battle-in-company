@@ -36,7 +36,7 @@ public class EnemyBase2 : MonoBehaviour
     public Animator ItemHolderAnim { get => itemHolder.GetComponent<Animator>(); }
 
     [SerializeField] protected GameObject itemHeld;
-    [SerializeField] protected LayerMask itemLayer;
+    private LayerMask itemLayer = 6;
     public GameObject ItemHeld() => itemHeld;
 
     #endregion
@@ -62,7 +62,7 @@ public class EnemyBase2 : MonoBehaviour
     [SerializeField] protected float sprintingSpeed = 5;
     [SerializeField] protected float jumpForce;
     [SerializeField] protected float jumps;
-    [SerializeField] protected float airResistance;
+    [SerializeField] protected float airResistance = 2;
 
     #endregion
 
