@@ -84,25 +84,7 @@ public class SearchItem : BaseState
         // Evade Player
         if (enemyBase2.TargetsInView().Count > 0)
         {
-            Search();
-
-            float playerDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.TargetEnemy().transform.position);
-            float enemyDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.transform.position);
-
-            // Player Evasion
-            if (playerDistanceToPoint > enemyDistanceToPoint)
-            {
-                if (enemyBase2.TargetsInView().Count > 0)
-                {
-                    Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
-                    enemyBase2.Agent.velocity = Vector3.Lerp(
-                        enemyBase2.Agent.desiredVelocity,
-                        -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
-                        // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
-                        Mathf.Clamp01(2 - directionToTarget.magnitude / 4)
-                    );
-                }
-            }
+            Evade();
         }
 
         if (enemyBase2.HasItem() == false)
@@ -122,5 +104,23 @@ public class SearchItem : BaseState
             EndState(EnemyBase2.States.Idle);
         }
 
+    }
+
+    private void Evade()
+    {
+        // Player Evasion
+        float playerDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.TargetEnemy().transform.position);
+        float enemyDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.transform.position);
+
+        if (playerDistanceToPoint > enemyDistanceToPoint)
+        {
+            Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
+            enemyBase2.Agent.velocity = Vector3.Lerp(
+                enemyBase2.Agent.desiredVelocity,
+                -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
+                // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
+                Mathf.Clamp01(2 - directionToTarget.magnitude / 4)
+            );
+        }
     }
 }

@@ -1,0 +1,35 @@
+{
+    "version": 1,
+    "name": "Interactable",
+    "maps": [
+        {
+            "name": "NormalInteractable",
+            "id": "9f01cce4-7214-4b8e-b4b8-de870edf32ea",
+            "actions": [
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "5db37487-c16f-40d4-ab34-987f95a8bd11",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "d6e4db26-66ee-4633-8abb-bb10dff600ff",
+                    "path": "<Keyboard>/g",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Interact",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

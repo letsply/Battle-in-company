@@ -117,11 +117,15 @@ public class Attack : BaseState
             enemyBase2.Agent.destination = destination;
         }
 
+        Evade();
 
+    }
+    private void Evade()
+    {
+        // Player Evasion
         float playerDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.TargetEnemy().transform.position);
         float enemyDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.transform.position);
 
-        // Player Evasion
         if (playerDistanceToPoint > enemyDistanceToPoint && waiting == true)
         {
             if (enemyBase2.TargetsInView().Count > 0)
@@ -135,8 +139,6 @@ public class Attack : BaseState
                 );
             }
         }
-        
     }
-
 
 }

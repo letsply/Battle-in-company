@@ -24,10 +24,19 @@ public class Idle : BaseState
         }
     }
 
+    protected override void UpdateOverride()
+    {
+        if (GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length == 0)
+        {
+            WalkAround();
+        }
+    }
+
     public void WalkAround()
     {
+
         // Generate a random destination to walk to in the range of 10
-        if (enemyBase2.Agent.velocity.magnitude <= 0.0125f)
+        if (enemyBase2.Agent.velocity.magnitude <= 0.05f || enemyBase2.Agent.remainingDistance < enemyBase2.Agent.stoppingDistance || waiting == false)
         {
             Vector3 destination = new Vector3
             (
@@ -38,21 +47,37 @@ public class Idle : BaseState
             enemyBase2.Agent.destination = destination;
         }
 
-        // Player Evasion
-        if (enemyBase2.TargetsInView().Count > 0)
+        // If agent takes longer then anticipatet search new dest
+        if (waiting == false)
         {
-            Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
-            enemyBase2.Agent.velocity = Vector3.Lerp(
-                enemyBase2.Agent.desiredVelocity,
-                -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
-                // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
-                Mathf.Clamp01(5 - directionToTarget.magnitude / 5)
-            );
+            float time = enemyBase2.Agent.desiredVelocity.magnitude / enemyBase2.Agent.remainingDistance;
+            // plus a buffer second
+            if (time != float.NaN)
+            { enemyBase2.StartCoroutine(Wait(time + 1)); }
         }
 
-        if (GameObject.FindObjectsByType<Item>(FindObjectsSortMode.None).Length == 0)
+        Evade();
+
+    }
+
+    public void Evade()
+    {
+        if (enemyBase2.TargetsInView().Count > 0)
         {
-            WalkAround();
+            // Player Evasion
+            float playerDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.TargetsInView()[0].transform.position);
+            float enemyDistanceToPoint = Vector3.Distance(enemyBase2.Agent.destination, enemyBase2.transform.position);
+
+            if (playerDistanceToPoint > enemyDistanceToPoint && waiting)
+            {
+                Vector3 directionToTarget = enemyBase2.TargetsInView()[0].transform.position - enemyBase2.transform.position;
+                enemyBase2.Agent.velocity = Vector3.Lerp(
+                    enemyBase2.Agent.desiredVelocity,
+                    -directionToTarget.normalized * enemyBase2.GetValue<float>(EnemyValues.sprintingSpeed),
+                    // The Distance when its completly away minus the actual distance diveded by the distance when its completly away
+                    Mathf.Clamp01(2 - directionToTarget.magnitude / 4)
+                );
+            }
         }
     }
 }
