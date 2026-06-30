@@ -52,7 +52,7 @@ public class Idle : BaseState
         {
             float time = enemyBase2.Agent.desiredVelocity.magnitude / enemyBase2.Agent.remainingDistance;
             // plus a buffer second
-            if (time != float.NaN)
+            if (time + 1 != float.NaN)
             { enemyBase2.StartCoroutine(Wait(time + 1)); }
         }
 

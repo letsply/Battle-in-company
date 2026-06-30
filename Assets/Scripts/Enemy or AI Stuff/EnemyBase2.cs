@@ -170,18 +170,7 @@ public class EnemyBase2 : MonoBehaviour
         view = new EnemyView();
         View.GetEnemyBase(this);
 
-        // Initialize States
-        Idle idle = new Idle();
-        SearchItem item = new SearchItem();
-        SearchPlayer player = new SearchPlayer();
-        Attack attack = new Attack();
-
-        states.Add(idle);
-        states.Add(item);
-        states.Add(player);
-        states.Add(attack);
-
-        SwitchState(States.Idle);
+        CreateStatesAndStart();
     }
 
     public virtual void Update()
@@ -313,6 +302,7 @@ public class EnemyBase2 : MonoBehaviour
         Agent.destination = newDestination.transform.position;
     }
 
+    #region StateStuff
     public void SwitchState(States state)
     {
         currentState = states[(int)state];
@@ -325,6 +315,22 @@ public class EnemyBase2 : MonoBehaviour
         else 
         { return false; }
     }
+    public void CreateStatesAndStart()
+    {
+        // Initialize States
+        Idle idle = new Idle();
+        SearchItem item = new SearchItem();
+        SearchPlayer player = new SearchPlayer();
+        Attack attack = new Attack();
+
+        states.Add(idle);
+        states.Add(item);
+        states.Add(player);
+        states.Add(attack);
+
+        SwitchState(States.Idle);
+    }
+    #endregion
 
     public void TakeDmg(float dmg)
     {
